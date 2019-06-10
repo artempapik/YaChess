@@ -1,1 +1,23 @@
-<h1>hello world</h1>
+<!--<button id="but" (click)="changePosition()">Click me</button>-->
+
+<!--<style>
+  button {
+    position: absolute;
+    left: 
+  }
+</style>-->
+
+<div *ngFor="let figure of mainFigures; let i = index">
+  <!--<style>
+    button {
+      position: absolute;
+      left: {{figure.x}}px;
+    }
+  </style>-->
+
+  <button [ngStyle]="setStyles1(i)" id="mainFigure{{i}}" class="main-figures" (click)="changePosition1(i)">mf{{i}}</button>
+</div>
+
+<div *ngFor="let figure of secondaryFigures; let i = index">
+  <button [ngStyle]="setStyles2(i)" id="secondaryFigure{{i}}" class="secondary-figures" (click)="changePosition2(i)">sf{{i}}</button>
+</div>

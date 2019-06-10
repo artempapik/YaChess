@@ -1,5 +1,6 @@
 //TODO
 //сделать, чтобы фигуры "не перескакивали" друг через друга (кроме коня)
+//ход не должен выходить за пределы "доски"
 
 import { Component } from '@angular/core';
 import { Figure } from '../services/figure';
@@ -26,9 +27,6 @@ export class HomeComponent {
   }
 
   changePosition(index: number, isMain: boolean) {
-    //console.log(this.mainFigures);
-    //console.log(this.secondaryFigures);
-
     let arr: Figure[] = isMain ? this.mainFigures : this.secondaryFigures;
     let id: string = isMain ? 'main' : 'secondary';
 
@@ -43,7 +41,7 @@ export class HomeComponent {
           return;
         }
       } else if (index === 1 || index === 6) { //конь
-        if (Math.abs(xsteps - ysteps) !== 1) {
+        if (Math.abs(Math.abs(xsteps) - Math.abs(ysteps)) !== 1) {
           alert('can not');
           return;
         }
@@ -52,7 +50,12 @@ export class HomeComponent {
           alert('can not');
           return;
         }
-      } else if (index === 4) { //король
+      } else if (index === 3) { //королева
+        if ((xsteps !== 0 && ysteps !== 0) && (Math.abs(xsteps) !== Math.abs(ysteps))) {
+          alert('can not');
+          return;
+        }
+      } else { //король
         if ((xsteps !== 0 && Math.abs(xsteps) !== 1) || (ysteps !== 0 && Math.abs(ysteps) !== 1)) {
           alert('can not');
           return;
@@ -64,20 +67,57 @@ export class HomeComponent {
         return;
       }
     }
-    //королева - как угодно
-    //
 
-    //новые предполагаемые координаты фигуры
+    //новые координаты фигуры
     let newX: number = arr[index].x + 50 * xsteps;
     let newY: number = arr[index].y - 40 * ysteps;
-    //
 
     //позиция хода не может совпадать с позициями других своих фигур
+    //фигуры не могут "перескакивать" друг через друга (кроме коня)
     if (isMain) { //фигура относится к главным - просматриваем все главные, кроме текущей, и все второстепенные
       for (let i: number = 0; i < this.mainFigures.length; i++) {
         if (index !== i) {
           if (newX === this.mainFigures[i].x && newY === this.mainFigures[i].y) {
             return;
+          }
+
+          if (index !== 1 && index !== 6) {
+            if (index === 0 || index === 7) { //ладья
+              if (newX > this.mainFigures[index].x && newY === this.mainFigures[index].y) { //вправо
+                if (newX > this.mainFigures[i].x && newY === this.mainFigures[i].y) {
+                  console.log('can not go right');
+                  return;
+                }
+              } else if (newX === this.mainFigures[index].x && newY < this.mainFigures[index].y) { //вверх
+                if (newY < this.mainFigures[i].y && newX === this.mainFigures[i].x) {
+                  console.log('can not go up');
+                  return;
+                }
+              } else if (newX < this.mainFigures[index].x && newY === this.mainFigures[index].y) { //влево
+                if (newX < this.mainFigures[i].x && newY === this.mainFigures[i].y) {
+                  console.log('can not go left');
+                  return;
+                }
+              } else { //вниз
+                if (newY > this.mainFigures[i].y && newX === this.mainFigures[i].x) {
+                  console.log('can not go down');
+                  return;
+                }
+              }
+            } else if (index === 2 || index === 5) { //слон
+              if (newX > this.mainFigures[index].x && newY < this.mainFigures[index].y) { //северо-восток
+                console.log(`a`);
+              } else if (newX < this.mainFigures[index].x && newY < this.mainFigures[index].y) { //северо-запад
+                console.log(`b`);
+              } else if (newX < this.mainFigures[index].x && newY > this.mainFigures[index].y) { //юго-запад
+                console.log(`c`);
+              } else { //юго-восток
+                console.log(`d`);
+              }
+            } else if (index === 3) { //королева
+              console.log(`here`);
+              return;
+            }
           }
         }
       }
@@ -102,7 +142,6 @@ export class HomeComponent {
         }
       }
     }
-    //
 
     arr[index].x = newX;
     arr[index].y = newY;

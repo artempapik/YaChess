@@ -151,7 +151,6 @@ export class HomeComponent {
         return this.rookValidation(index, i, newPosX, newPosY, figures) || this.bishopValidation(index, i, newPosX, newPosY, figures);
       }
     }
-    return false;
   }
 
   rookValidation(index: number, i: number, newPosX: number, newPosY: number, figures: Figure[]): boolean {
@@ -180,24 +179,24 @@ export class HomeComponent {
 
   bishopValidation(index: number, i: number, newPosX: number, newPosY: number, figures: Figure[]): boolean {
     if (newPosX > this.mainFigures[index].fieldX && newPosY > this.mainFigures[index].fieldY) { //северо-восток
-      if (figures[i].fieldX - figures[index].fieldX === figures[i].fieldY - figures[index].fieldY) {
+      if (figures[i].fieldX === figures[index].fieldX && figures[i].fieldY === figures[index].fieldY) {
         console.log('can not go north-east');
-        return;
+        return true;
       }
     } else if (newPosX < this.mainFigures[index].fieldX && newPosY > this.mainFigures[index].fieldY) { //северо-запад
-      if (Math.abs(figures[i].fieldX - figures[index].fieldX) === figures[i].fieldY - figures[index].fieldY) {
+      if (figures[i].fieldX === figures[index].fieldX && figures[i].fieldY === figures[index].fieldY) {
         console.log('can not go north-west');
-        return;
+        return true;
       }
     } else if (newPosX < this.mainFigures[index].fieldX && newPosY < this.mainFigures[index].fieldY) { //юго-запад
-      if (figures[i].fieldX - figures[index].fieldX === figures[i].fieldY - figures[index].fieldY) {
+      if (figures[i].fieldX === figures[index].fieldX && figures[i].fieldY === figures[index].fieldY) {
         console.log('can not go south-west');
-        return;
+        return true;
       }
     } else if (newPosX > this.mainFigures[index].fieldX && newPosY < this.mainFigures[index].fieldY) { //юго-восток
-      if (figures[i].fieldX - figures[index].fieldX === Math.abs(figures[i].fieldY - figures[index].fieldY)) {
+      if (figures[i].fieldX === figures[index].fieldX && figures[i].fieldY === figures[index].fieldY) {
         console.log('can not go south-east');
-        return;
+        return true;
       }
     }
   }

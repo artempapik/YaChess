@@ -2,8 +2,8 @@ export class Figure {
   constructor(
     public x: number,
     public y: number,
-    public fieldX: number,
-    public fieldY: number,
+    public coordx: number,
+    public coordy: number,
     public firstMove?: boolean
   ) { }
 }

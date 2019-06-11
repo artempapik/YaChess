@@ -1,7 +1,7 @@
 <div *ngFor="let figure of mainFigures; let i = index">
-  <button [ngStyle]="setStyles(i, true)" id="mainFigure{{i}}" (click)="changePosition(i, true)">m{{i}}</button>
+  <button [ngStyle]="setStyles(i, true)" id="main{{i}}" (click)="changePosition(i, true)">m{{i}}</button>
 </div>
 
 <div *ngFor="let figure of secondaryFigures; let i = index">
-  <button [ngStyle]="setStyles(i, false)" id="secondaryFigure{{i}}" (click)="changePosition(i, false)">s{{i}}</button>
+  <button [ngStyle]="setStyles(i, false)" id="secondary{{i}}" (click)="changePosition(i, false)">s{{i}}</button>
 </div>

@@ -72,6 +72,11 @@ export class HomeComponent {
     let newX: number = arr[index].x + 50 * xsteps;
     let newY: number = arr[index].y - 40 * ysteps;
 
+    //console.log(arr[index].x);
+    //console.log(arr[index].y);
+    //console.log(newX);
+    //console.log(newY);
+
     //позиция хода не может совпадать с позициями других своих фигур
     //фигуры не могут "перескакивать" друг через друга (кроме коня)
     if (isMain) { //фигура относится к главным - просматриваем все главные, кроме текущей, и все второстепенные
@@ -106,9 +111,15 @@ export class HomeComponent {
               }
             } else if (index === 2 || index === 5) { //слон
               if (newX > this.mainFigures[index].x && newY < this.mainFigures[index].y) { //северо-восток
-                console.log(`a`);
+                if (newX > this.mainFigures[i].x && newY < this.mainFigures[i].y && this.mainFigures[i].y < this.mainFigures[index].y) { //доп. условие (рассматриваем ТОЛЬКО те элементы, что выше)
+                  console.log(`a`);
+                  return;
+                }
               } else if (newX < this.mainFigures[index].x && newY < this.mainFigures[index].y) { //северо-запад
-                console.log(`b`);
+                if (newX < this.mainFigures[i].x && newY < this.mainFigures[i].y) {
+                  console.log(`b`);
+                  return;
+                }
               } else if (newX < this.mainFigures[index].x && newY > this.mainFigures[index].y) { //юго-запад
                 console.log(`c`);
               } else { //юго-восток

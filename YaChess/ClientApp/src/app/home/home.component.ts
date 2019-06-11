@@ -1,6 +1,6 @@
 //TODO
-//сделать, чтобы фигуры "не перескакивали" друг через друга (кроме коня)
 //ход не должен выходить за пределы "доски"
+//пересмотреть условие для ладьи
 
 import { Component } from '@angular/core';
 import { Figure } from '../services/figure';
@@ -31,9 +31,6 @@ export class HomeComponent {
   }
 
   changePosition(index: number, isMain: boolean) {
-    //console.log(this.mainFigures);
-    //console.log(this.secondaryFigures);
-
     let arr: Figure[] = isMain ? this.mainFigures : this.secondaryFigures;
     let id: string = isMain ? 'main' : 'secondary';
 
@@ -69,9 +66,16 @@ export class HomeComponent {
         }
       }
     } else { //пешка
-      if (xsteps !== 0 || (ysteps !== 1 && ysteps !== 2)) {
-        alert('can not');
-        return;
+      if (arr[index].firstMove) {
+        if (xsteps !== 0 || ysteps !== 1) {
+          alert('can not');
+          return;
+        }
+      } else {
+        if (xsteps !== 0 || (ysteps !== 1 && ysteps !== 2)) {
+          alert('can not');
+          return;
+        }
       }
     }
 
@@ -79,54 +83,34 @@ export class HomeComponent {
     let newX: number = arr[index].x + 50 * xsteps;
     let newY: number = arr[index].y - 40 * ysteps;
 
+    //новая позиция
+    let newPosX: number = arr[index].fieldX + xsteps;
+    let newPosY: number = arr[index].fieldY + ysteps;
+
     //позиция хода не может совпадать с позициями других своих фигур
     //фигуры не могут "перескакивать" друг через друга (кроме коня)
     if (isMain) { //фигура относится к главным - просматриваем все главные, кроме текущей, и все второстепенные
       for (let i: number = 0; i < this.mainFigures.length; i++) {
         if (index !== i) {
-          if (newX === this.mainFigures[i].x && newY === this.mainFigures[i].y) {
+          if (newPosX === this.mainFigures[i].fieldX && newPosY === this.mainFigures[i].fieldY) {
+            console.log('can not place here');
             return;
           }
 
-          if (index !== 1 && index !== 6) { //если не конь
-            if (index === 0 || index === 7) { //ладья
-              if (this.rookValidation(newX, newY, this.mainFigures[index].x, this.mainFigures[index].y, this.mainFigures[i].x, this.mainFigures[i].y)) {
-                return;
-              }
-            } else if (index === 2 || index === 5) { //слон
-              if (this.bishopValidation(newX, newY, this.mainFigures[index].fieldX, this.mainFigures[index].fieldY, this.mainFigures[i].fieldX, this.mainFigures[i].fieldY)) {
-                return;
-              }
-            } else if (index === 3) { //королева
-              if (this.rookValidation(newX, newY, this.mainFigures[index].x, this.mainFigures[index].y, this.mainFigures[i].x, this.mainFigures[i].y) ||
-                  this.bishopValidation(newX, newY, this.mainFigures[index].fieldX, this.mainFigures[index].fieldY, this.mainFigures[i].fieldX, this.mainFigures[i].fieldY)) {
-                return;
-              }
-            }
+          if (this.figuresValidation(index, i, newPosX, newPosY, this.mainFigures)) {
+            return;
           }
         }
       }
 
-      for (let i: number = 0; i < this.secondaryFigures.length; i++) {   
-        if (newX === this.secondaryFigures[i].x && newY === this.secondaryFigures[i].y) {
+      for (let i: number = 0; i < this.secondaryFigures.length; i++) {
+        if (newPosX === this.secondaryFigures[i].fieldX && newPosY === this.secondaryFigures[i].fieldY) {
+          console.log('can not place here');
           return;
         }
 
-        if (index !== 1 && index !== 6) { //если не конь
-          if (index === 0 || index === 7) { //ладья
-            if (this.rookValidation(newX, newY, this.secondaryFigures[index].x, this.secondaryFigures[index].y, this.secondaryFigures[i].x, this.secondaryFigures[i].y)) {
-              return;
-            }
-          } else if (index === 2 || index === 5) { //слон
-            if (this.bishopValidation(newX, newY, this.secondaryFigures[index].fieldX, this.secondaryFigures[index].fieldY, this.secondaryFigures[i].fieldX, this.secondaryFigures[i].fieldY)) {
-              return;
-            }
-          } else if (index === 3) { //королева
-            if (this.rookValidation(newX, newY, this.secondaryFigures[index].x, this.secondaryFigures[index].y, this.secondaryFigures[i].x, this.secondaryFigures[i].y) ||
-              this.bishopValidation(newX, newY, this.secondaryFigures[index].fieldX, this.secondaryFigures[index].fieldY, this.secondaryFigures[i].fieldX, this.secondaryFigures[i].fieldY)) {
-              return;
-            }
-          }
+        if (this.figuresValidation(index, i, newPosX, newPosY, this.secondaryFigures)) {
+          return;
         }
       }
     } else { //фигура относится к второстепенной - просматриваем все главные и все второстепенные, кроме текущей
@@ -145,6 +129,8 @@ export class HomeComponent {
       }
     }
 
+    arr[index].firstMove = true;
+
     arr[index].x = newX;
     arr[index].y = newY;
 
@@ -155,60 +141,65 @@ export class HomeComponent {
     document.getElementById(`${id}Figure${index}`).style.top = `${arr[index].y}px`;
   }
 
-  rookValidation(newX: number, newY: number, currentX: number, currentY: number, checkX: number, checkY: number): boolean {
-    if (newX > currentX && newY === currentY) { //вправо
-      if (newX > checkX && newY === checkY) {
+  figuresValidation(index: number, i: number, newPosX: number, newPosY: number, figures: Figure[]): boolean {
+    if (index !== 1 && index !== 6) {
+      if (index === 0 || index === 7) { //ладья
+        return this.rookValidation(index, i, newPosX, newPosY, figures);
+      } else if (index === 2 || index === 5) { //слон
+        return this.bishopValidation(index, i, newPosX, newPosY, figures);
+      } else if (index === 3) { //королева
+        return this.rookValidation(index, i, newPosX, newPosY, figures) || this.bishopValidation(index, i, newPosX, newPosY, figures);
+      }
+    }
+    return false;
+  }
+
+  rookValidation(index: number, i: number, newPosX: number, newPosY: number, figures: Figure[]): boolean {
+    if (newPosX > this.mainFigures[index].fieldX && newPosY === this.mainFigures[index].fieldY) { //вправо
+      if (newPosX > figures[i].fieldX && newPosY === figures[i].fieldY) {
         console.log('can not go right');
         return true;
       }
-    } else if (newX === currentX && newY < currentY) { //вверх
-      if (newY < checkY && newX === checkX) {
+    } else if (newPosX === this.mainFigures[index].fieldX && newPosY > this.mainFigures[index].fieldY) { //вверх
+      if (newPosY > figures[i].fieldY && newPosX === figures[i].fieldX) {
         console.log('can not go up');
         return true;
       }
-    } else if (newX < currentX && newY === currentY) { //влево
-      if (newX < checkX && newY === checkY) {
+    } else if (newPosX < this.mainFigures[index].fieldX && newPosY === this.mainFigures[index].fieldY) { //влево
+      if (newPosX < figures[i].fieldX && newPosY === figures[i].fieldY) {
         console.log('can not go left');
         return true;
       }
-    } else if (newX === currentX && newY > currentY) { //вниз
-      if (newY > checkY && newX === checkX) {
+    } else if (newPosX === this.mainFigures[index].fieldX && newPosY < this.mainFigures[index].fieldY) { //вниз
+      if (newPosY < figures[i].fieldY && newPosX === figures[i].fieldX) {
         console.log('can not go down');
         return true;
       }
     }
-
-    return false;
   }
 
-  bishopValidation(newX: number, newY: number, currentX: number, currentY: number, checkX: number, checkY: number): boolean {
-    if (newX > currentX && newY < currentY) { //северо-восток
-      if (newX > checkX && newY < checkY && checkY < currentY) {
-        if (checkX - currentX === checkY - currentY) {
-          console.log('can not go north-east');
-          return true;
-        }
+  bishopValidation(index: number, i: number, newPosX: number, newPosY: number, figures: Figure[]): boolean {
+    if (newPosX > this.mainFigures[index].fieldX && newPosY > this.mainFigures[index].fieldY) { //северо-восток
+      if (figures[i].fieldX - figures[index].fieldX === figures[i].fieldY - figures[index].fieldY) {
+        console.log('can not go north-east');
+        return;
       }
-    } else if (newX < currentX && newY < currentY) { //северо-запад
-      if (newX < checkX && newY < checkY) {
-        if (Math.abs(checkX - currentX) === checkY - currentY) {
-          console.log('can not go north-west');
-          return true;
-        }
+    } else if (newPosX < this.mainFigures[index].fieldX && newPosY > this.mainFigures[index].fieldY) { //северо-запад
+      if (Math.abs(figures[i].fieldX - figures[index].fieldX) === figures[i].fieldY - figures[index].fieldY) {
+        console.log('can not go north-west');
+        return;
       }
-    } else if (newX < currentX && newY > currentY) { //юго-запад
-      if (checkX - currentX === checkY - currentY) {
+    } else if (newPosX < this.mainFigures[index].fieldX && newPosY < this.mainFigures[index].fieldY) { //юго-запад
+      if (figures[i].fieldX - figures[index].fieldX === figures[i].fieldY - figures[index].fieldY) {
         console.log('can not go south-west');
-        return true;
+        return;
       }
-    } else { //юго-восток
-      if (checkX - currentX === Math.abs(checkY - currentY)) {
+    } else if (newPosX > this.mainFigures[index].fieldX && newPosY < this.mainFigures[index].fieldY) { //юго-восток
+      if (figures[i].fieldX - figures[index].fieldX === Math.abs(figures[i].fieldY - figures[index].fieldY)) {
         console.log('can not go south-east');
-        return true;
+        return;
       }
     }
-
-    return false;
   }
 
   setStyles(i: number, isMain: boolean) {

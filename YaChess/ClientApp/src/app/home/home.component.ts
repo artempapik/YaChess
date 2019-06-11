@@ -11,11 +11,11 @@ export class HomeComponent {
   secondaryFigures: Figure[] = [];
 
   ngOnInit() {
-    let coordx: number = 500;
+    let coordx: number = 600;
 
     for (let i: number = 0; i < 8; i++) {
-      this.mainFigures.push(new Figure(i, 0, coordx, 440));
-      this.secondaryFigures.push(new Figure(i, 1, coordx, 400));
+      this.mainFigures.push(new Figure(i, 0, coordx, 400));
+      this.secondaryFigures.push(new Figure(i, 1, coordx, 350));
       coordx += 50;
     }
   }
@@ -35,7 +35,7 @@ export class HomeComponent {
     figure.firstMove = true;
 
     figure.coordx += 50 * xsteps;
-    figure.coordy -= 40 * ysteps;
+    figure.coordy -= 50 * ysteps;
 
     figure.x = newx;
     figure.y = newy;

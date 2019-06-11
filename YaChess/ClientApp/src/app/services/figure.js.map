@@ -1,1 +1,1 @@
-{"version":3,"file":"figure.js","sourceRoot":"","sources":["figure.ts"],"names":[],"mappings":";;AAAA;IACE,gBACS,CAAS,EACT,CAAS;QADT,MAAC,GAAD,CAAC,CAAQ;QACT,MAAC,GAAD,CAAC,CAAQ;IACd,CAAC;IACP,aAAC;AAAD,CAAC,AALD,IAKC;AALY,wBAAM"}
+{"version":3,"file":"figure.js","sourceRoot":"","sources":["figure.ts"],"names":[],"mappings":";;AAAA;IACE,gBACS,CAAS,EACT,CAAS,EACT,MAAc,EACd,MAAc;QAHd,MAAC,GAAD,CAAC,CAAQ;QACT,MAAC,GAAD,CAAC,CAAQ;QACT,WAAM,GAAN,MAAM,CAAQ;QACd,WAAM,GAAN,MAAM,CAAQ;IACnB,CAAC;IACP,aAAC;AAAD,CAAC,AAPD,IAOC;AAPY,wBAAM"}

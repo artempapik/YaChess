@@ -1,3 +1,5 @@
+//fix bishop
+
 import { Figure } from '../services/figure';
 import { Component } from '@angular/core';
 
@@ -40,7 +42,7 @@ export class HomeComponent {
       }
 
       if (isPawn) {
-        if (figure.x === newx + 1 && figure.y === newy + 1) {
+        if (figure.x === newx && figure.y + 1 === newy) {
           return;
         }
       }

@@ -12,34 +12,61 @@ export class HomeComponent {
   buttonsToMove: HTMLButtonElement[] = [];
 
   ngOnInit() {
+    const STEP = 50;
+
     let coordx: number = 600;
 
     for (let i: number = 0; i < 8; i++) {
       this.mainFigures.push(new Figure(i, 0, coordx, 400));
       this.secondaryFigures.push(new Figure(i, 1, coordx, 350));
-      coordx += 50;
+      coordx += STEP;
     }
   }
 
-  createButton(figure: Figure, selectedFigure: Figure, id: string, index: number, xcoord: number, ycoord: number): boolean {
-    let newx: number = selectedFigure.x + xcoord / 50;
-    let newy: number = selectedFigure.y + ycoord / 50;
+  figures: Figure[] = [];
 
-    //console.log(`${figure.x} ${figure.y}`);
+  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number) {
+    const STEP = 50;
 
-    if (newx === figure.x && newy === figure.y) {
-      return true;
+    let newx: number = selectedFigure.x + x;
+    let newy: number = selectedFigure.y + y;
+
+    if (newx > 7 || newx < 0 || newy > 7 || newy < 0) {
+      return;
     }
 
-    //console.log(`${figure.x} ${figure.y}`);
+    for (let figure of this.figures) {
+      if (figure.x === newx && figure.y === newy) {
+        return;
+      }
+
+      switch (index) {
+        case 0:
+        case 7:
+          if (this.rookValidation(newx, newy, figure, selectedFigure)) {
+            return;
+          }
+          break;
+        case 2:
+        case 5:
+          if (this.bishopValidation(newx, newy, figure, selectedFigure)) {
+            return;
+          }
+          break;
+        case 3:
+          if (this.rookValidation(newx, newy, figure, selectedFigure) || this.bishopValidation(newx, newy, figure, selectedFigure) {
+            return;
+          }
+      }
+    }
 
     let button = document.createElement("button");
     button.innerHTML = "•";
 
     let body = document.getElementsByTagName("body")[0];
 
-    button.style.left = `${selectedFigure.coordx + xcoord}px`;
-    button.style.top = `${selectedFigure.coordy - ycoord}px`;
+    button.style.left = `${selectedFigure.coordx + x * STEP}px`;
+    button.style.top = `${selectedFigure.coordy - y * STEP}px`;
 
     body.appendChild(button);
 
@@ -49,11 +76,11 @@ export class HomeComponent {
       document.getElementById(`${id}${index}`).style.left = button.style.left;
       document.getElementById(`${id}${index}`).style.top = button.style.top;
 
-      selectedFigure.coordx += xcoord;
-      selectedFigure.coordy -= ycoord;
+      selectedFigure.coordx += x * STEP;
+      selectedFigure.coordy -= y * STEP;
 
-      selectedFigure.x += xcoord / 50;
-      selectedFigure.y += ycoord / 50;
+      selectedFigure.x = newx;
+      selectedFigure.y = newy;
 
       for (let buttonToMove of buttonsToMove) {
         buttonToMove.remove();
@@ -76,18 +103,93 @@ export class HomeComponent {
 
     this.buttonsToMove.length = 0;
 
-    let figures: Figure[] = [];
-
     for (let figure of this.mainFigures) {
-      figures.push(figure);
+      this.figures.push(figure);
     }
 
     for (let figure of this.secondaryFigures) {
-      figures.push(figure);
+      this.figures.push(figure);
     }
 
     let indexToDelete = mainFigure ? index : index + 8;
-    figures.splice(indexToDelete, 1);
+    this.figures.splice(indexToDelete, 1);
+
+    for (let i: number = 1; i < 8; i++) {
+      if (mainFigure) {
+        switch (index) {
+          case 0:
+          case 7:
+            this.rookSteps(selectedFigure, id, index, i);
+            break;
+          case 1:
+          case 6:
+            this.knightSteps(selectedFigure, id, index, i);
+            return;
+          case 2:
+          case 5:
+            this.bishopSteps(selectedFigure, id, index, i);
+            break;
+          case 3:
+            this.queenSteps(selectedFigure, id, index, i);
+            break;
+          case 4:
+            this.kingSteps(selectedFigure, id, index, i);
+            return;
+        }
+      } else {
+        this.pawnSteps(selectedFigure, id, index, i);
+        return;
+      }
+    }
+  }
+
+  queenSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.rookSteps(selectedFigure, id, index, i);
+    this.bishopSteps(selectedFigure, id, index, i);
+  }
+
+  kingSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, i, 0);
+    this.createButton(selectedFigure, id, index, -i, 0);
+    this.createButton(selectedFigure, id, index, 0, i);
+    this.createButton(selectedFigure, id, index, 0, -i);
+    this.createButton(selectedFigure, id, index, i, i);
+    this.createButton(selectedFigure, id, index, i, -i);
+    this.createButton(selectedFigure, id, index, -i, i);
+    this.createButton(selectedFigure, id, index, -i, -i);
+  }
+
+  rookSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, i, 0);
+    this.createButton(selectedFigure, id, index, -i, 0);
+    this.createButton(selectedFigure, id, index, 0, i);
+    this.createButton(selectedFigure, id, index, 0, -i);
+  }
+
+  bishopSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, i, i);
+    this.createButton(selectedFigure, id, index, -i, i);
+    this.createButton(selectedFigure, id, index, i, -i);
+    this.createButton(selectedFigure, id, index, -i, -i);
+  }
+
+  knightSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, i, i + 1);
+    this.createButton(selectedFigure, id, index, -i, i + 1);
+    this.createButton(selectedFigure, id, index, i, i - 3);
+    this.createButton(selectedFigure, id, index, -i, i - 3);
+    this.createButton(selectedFigure, id, index, i + 1, i - 2);
+    this.createButton(selectedFigure, id, index, i + 1, i);
+    this.createButton(selectedFigure, id, index, i - 3, i);
+    this.createButton(selectedFigure, id, index, i - 3, i - 2);
+  }
+
+  pawnSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, 0, i);
+
+    if (!selectedFigure.firstMove) {
+      this.createButton(selectedFigure, id, index, 0, i + 1);
+    }
   }
 
   rookValidation(newx: number, newy: number, figure: Figure, selectedFigure: Figure): boolean {

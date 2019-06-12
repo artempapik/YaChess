@@ -21,27 +21,75 @@ export class HomeComponent {
   }
 
   changePosition(index: number, mainFigure: boolean) {
-    let figure: Figure = mainFigure ? this.mainFigures[index] : this.secondaryFigures[index];
+    let selectedFigure: Figure = mainFigure ? this.mainFigures[index] : this.secondaryFigures[index];
     let id: string = mainFigure ? 'main' : 'secondary';
 
     let xsteps: number = +prompt('how much x?');
     let ysteps: number = +prompt('how much y?');
 
-    let newx: number = figure.x + xsteps;
-    let newy: number = figure.y + ysteps;
+    let newx: number = selectedFigure.x + xsteps;
+    let newy: number = selectedFigure.y + ysteps;
 
     //logic goes here...
 
-    figure.firstMove = true;
+    let figures: Figure[] = [];
 
-    figure.coordx += 50 * xsteps;
-    figure.coordy -= 50 * ysteps;
+    for (let figure of this.mainFigures) {
+      figures.push(figure);
+    }
 
-    figure.x = newx;
-    figure.y = newy;
+    for (let figure of this.secondaryFigures) {
+      figures.push(figure);
+    }
 
-    document.getElementById(`${id}${index}`).style.left = `${figure.coordx}px`;
-    document.getElementById(`${id}${index}`).style.top = `${figure.coordy}px`;
+    let indexToDelete = mainFigure ? index : index + 8;
+    figures.splice(indexToDelete, 1);
+
+    for (let figure of figures) {
+      if (newx === figure.x && newy === figure.y) {
+        return;
+      }
+
+      if (mainFigure) {
+        switch (index) {
+          case 0:
+          case 7:
+            if (this.rookValidation(newx, newy, figure, selectedFigure)) {
+              return;
+            }
+            break;
+          //bishop
+          case 2:
+          case 5:
+            break;
+          case 3:
+            break;
+        }
+      }
+    }
+
+    selectedFigure.firstMove = true;
+
+    selectedFigure.coordx += 50 * xsteps;
+    selectedFigure.coordy -= 50 * ysteps;
+
+    selectedFigure.x = newx;
+    selectedFigure.y = newy;
+
+    document.getElementById(`${id}${index}`).style.left = `${selectedFigure.coordx}px`;
+    document.getElementById(`${id}${index}`).style.top = `${selectedFigure.coordy}px`;
+  }
+
+  rookValidation(newx: number, newy: number, figure: Figure, selectedFigure: Figure): boolean {
+    if (newx > selectedFigure.x && newy === selectedFigure.y) {
+      return figure.y === selectedFigure.y && figure.x > selectedFigure.x && figure.x < newx;
+    } else if (newx < selectedFigure.x && newy === selectedFigure.y) {
+      return figure.y === selectedFigure.y && figure.x < selectedFigure.x && figure.x > newx;
+    } else if (newx === selectedFigure.x && newy > selectedFigure.y) {
+      return figure.x === selectedFigure.x && figure.y > selectedFigure.y && figure.y < newy;
+    } else if (newx === selectedFigure.x && newy < selectedFigure.y) {
+      return figure.x === selectedFigure.x && figure.y < selectedFigure.y && figure.y > newy;
+    }
   }
 
   setStyles(i: number, isMain: boolean) {

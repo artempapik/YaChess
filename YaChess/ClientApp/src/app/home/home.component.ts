@@ -10,6 +10,7 @@ export class HomeComponent {
   mainFigures: Figure[] = [];
   secondaryFigures: Figure[] = [];
   buttonsToMove: HTMLButtonElement[] = [];
+  figures: Figure[] = [];
 
   ngOnInit() {
     const STEP = 50;
@@ -23,9 +24,7 @@ export class HomeComponent {
     }
   }
 
-  figures: Figure[] = [];
-
-  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number) {
+  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, isPawn?: boolean) {
     const STEP = 50;
 
     let newx: number = selectedFigure.x + x;
@@ -38,6 +37,12 @@ export class HomeComponent {
     for (let figure of this.figures) {
       if (figure.x === newx && figure.y === newy) {
         return;
+      }
+
+      if (isPawn) {
+        if (figure.x === newx + 1 && figure.y === newy + 1) {
+          return;
+        }
       }
 
       switch (index) {
@@ -54,7 +59,7 @@ export class HomeComponent {
           }
           break;
         case 3:
-          if (this.rookValidation(newx, newy, figure, selectedFigure) || this.bishopValidation(newx, newy, figure, selectedFigure) {
+          if (this.rookValidation(newx, newy, figure, selectedFigure) || this.bishopValidation(newx, newy, figure, selectedFigure)) {
             return;
           }
       }
@@ -188,7 +193,7 @@ export class HomeComponent {
     this.createButton(selectedFigure, id, index, 0, i);
 
     if (!selectedFigure.firstMove) {
-      this.createButton(selectedFigure, id, index, 0, i + 1);
+      this.createButton(selectedFigure, id, index, 0, i + 1, true);
     }
   }
 

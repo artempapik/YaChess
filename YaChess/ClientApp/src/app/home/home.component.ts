@@ -1,5 +1,3 @@
-//fix bishop
-
 import { Figure } from '../services/figure';
 import { Component } from '@angular/core';
 
@@ -213,13 +211,17 @@ export class HomeComponent {
 
   bishopValidation(newx: number, newy: number, figure: Figure, selectedFigure: Figure): boolean {
     if (newx > selectedFigure.x && newy > selectedFigure.y) {
-      return figure.x > selectedFigure.x && figure.y > selectedFigure.y && figure.x - selectedFigure.x === figure.y - selectedFigure.y;
+      return figure.x > selectedFigure.x && figure.y > selectedFigure.y && figure.x < newx && figure.y < newy &&
+        figure.x - selectedFigure.x === figure.y - selectedFigure.y;
     } else if (newx < selectedFigure.x && newy > selectedFigure.y) {
-      return figure.x < selectedFigure.x && figure.y > selectedFigure.y && Math.abs(figure.x - selectedFigure.x) === figure.y - selectedFigure.y;
+      return figure.x < selectedFigure.x && figure.y > selectedFigure.y && figure.x > newx && figure.y < newy &&
+        Math.abs(figure.x - selectedFigure.x) === figure.y - selectedFigure.y;
     } else if (newx > selectedFigure.x && newy < selectedFigure.y) {
-      return figure.x > selectedFigure.x && figure.y < selectedFigure.y && figure.x - selectedFigure.x === Math.abs(figure.y - selectedFigure.y);
+      return figure.x > selectedFigure.x && figure.y < selectedFigure.y && figure.x < newx && figure.y > newy &&
+        figure.x - selectedFigure.x === Math.abs(figure.y - selectedFigure.y);
     } else if (newx < selectedFigure.x && newy < selectedFigure.y) {
-      return figure.x < selectedFigure.x && figure.y < selectedFigure.y && figure.x - selectedFigure.x === figure.y - selectedFigure.y;
+      return figure.x < selectedFigure.x && figure.y < selectedFigure.y && figure.x > newx && figure.y > newy &&
+        figure.x - selectedFigure.x === figure.y - selectedFigure.y;
     }
   }
 

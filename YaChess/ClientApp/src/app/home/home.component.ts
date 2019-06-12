@@ -58,9 +58,11 @@ export class HomeComponent {
               return;
             }
             break;
-          //bishop
           case 2:
           case 5:
+            if (this.bishopValidation(newx, newy, figure, selectedFigure)) {
+              return;
+            }
             break;
           case 3:
             break;
@@ -89,6 +91,18 @@ export class HomeComponent {
       return figure.x === selectedFigure.x && figure.y > selectedFigure.y && figure.y < newy;
     } else if (newx === selectedFigure.x && newy < selectedFigure.y) {
       return figure.x === selectedFigure.x && figure.y < selectedFigure.y && figure.y > newy;
+    }
+  }
+
+  bishopValidation(newx: number, newy: number, figure: Figure, selectedFigure: Figure): boolean {
+    if (newx > selectedFigure.x && newy > selectedFigure.y) {
+      return figure.x > selectedFigure.x && figure.y > selectedFigure.y && figure.x - selectedFigure.x === figure.y - selectedFigure.y;
+    } else if (newx < selectedFigure.x && newy > selectedFigure.y) {
+      return figure.x < selectedFigure.x && figure.y > selectedFigure.y && Math.abs(figure.x - selectedFigure.x) === figure.y - selectedFigure.y;
+    } else if (newx > selectedFigure.x && newy < selectedFigure.y) {
+      return figure.x > selectedFigure.x && figure.y < selectedFigure.y && figure.x - selectedFigure.x === Math.abs(figure.y - selectedFigure.y);
+    } else if (newx < selectedFigure.x && newy < selectedFigure.y) {
+      return figure.x < selectedFigure.x && figure.y < selectedFigure.y && figure.x - selectedFigure.x === figure.y - selectedFigure.y;
     }
   }
 

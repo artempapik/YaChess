@@ -65,6 +65,9 @@ export class HomeComponent {
             }
             break;
           case 3:
+            if (this.rookValidation(newx, newy, figure, selectedFigure) || this.bishopValidation(newx, newy, figure, selectedFigure)) {
+              return;
+            }
             break;
         }
       }

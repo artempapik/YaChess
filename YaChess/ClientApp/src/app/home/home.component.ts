@@ -24,27 +24,54 @@ export class HomeComponent {
     let coordx: number = 600;
 
     for (let i: number = 0; i < 8; i++) {
-      this.mainFigures.push(new Figure(i, 0, coordx, 400));
-      this.secondaryFigures.push(new Figure(i, 1, coordx, 350));
+      this.mainFigures.push(new Figure(`main${i}`, i, 0, coordx, 400));
+      this.secondaryFigures.push(new Figure(`secondary${i}`,i, 1, coordx, 350));
 
-      this.mainFiguresEnemy.push(new Figure(i, 7, coordx, 50));
-      this.secondaryFiguresEnemy.push(new Figure(i, 6, coordx, 100));
+      this.mainFiguresEnemy.push(new Figure(`mainEnemy${i}`, i, 7, coordx, 50));
+      this.secondaryFiguresEnemy.push(new Figure(`secondaryEnemy${i}`, i, 6, coordx, 100));
 
       coordx += this.STEP;
     }
   }
 
-  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, enemy: boolean, pawn?: boolean) {
+  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, enemy: boolean, pawn?: boolean, secondary?: boolean) {
     let newx: number = selectedFigure.x + x;
     let newy: number = enemy ?
       selectedFigure.y - y : selectedFigure.y + y;
 
-    if (newx > 7 || newx < 0 || newy > 7 || newy < 0) {
+    if (newx > 7 || newx < 0 || newy > 7 || newy < 0) { //не выходить за пределы доски
       return;
     }
 
-    let figures: Figure[] = enemy ?
-      this.figuresEnemy : this.figures;
+    let figures: Figure[] = enemy ? this.figuresEnemy : this.figures;
+    let figuresEnemy: Figure[] = enemy ? this.figures : this.figuresEnemy;
+
+    //
+
+    if (secondary) {
+      let canBeat: boolean = false;
+
+      for (let figureEnemy of figuresEnemy) {
+        if (figureEnemy.x === newx && figureEnemy.y === newy) {
+          canBeat = true;
+          break;
+        }
+      }
+
+      if (!canBeat) {
+        return;
+      }
+    }
+
+    //TODO
+    //рисовать 1 клеточку во вражеском направлении
+    if (!secondary) { //при совпадении будущих координат фигуры с вражескими - не рисовать ход (но для пешки - рисовать)
+      for (let figureEnemy of figuresEnemy) {
+        if (figureEnemy.x === newx && figureEnemy.y === newy) {
+          return;
+        }
+      }
+    }
 
     for (let figure of figures) {
       if (figure.x === newx && figure.y === newy) {
@@ -53,11 +80,23 @@ export class HomeComponent {
 
       if (pawn) {
         if (enemy) {
-          if (figure.x === newx && figure.y - 1 === newy) {
+          for (let figureEnemy of figuresEnemy) { //чтобы вражеская пешка не перепрыгивала вражеские фигуры
+            if (figureEnemy.x === newx && figureEnemy.y - 1 === newy) {
+              return;
+            }
+          }
+
+          if (figure.x === newx && figure.y - 1 === newy) { //чтобы вражеская пешка не перепрыгивала "свои" фигуры
             return;
           }
         } else {
-          if (figure.x === newx && figure.y + 1 === newy) {
+          for (let figureEnemy of figuresEnemy) { //чтобы "своя" пешка не перепрыгивала вражеские фигуры
+            if (figureEnemy.x === newx && figureEnemy.y + 1 === newy) {
+              return;
+            }
+          }
+
+          if (figure.x === newx && figure.y + 1 === newy) { //чтобы "своя" пешка не перепрыгивала "свои" фигуры
             return;
           }
         }
@@ -98,6 +137,13 @@ export class HomeComponent {
       this.buttonsToMoveEnemy : this.buttonsToMove;
 
     button.addEventListener("click", function () {
+      for (let figureEnemy of figuresEnemy) {
+        if (button.style.left === `${figureEnemy.coordx}px` && button.style.top === `${figureEnemy.coordy}px`) {
+          document.getElementById(figureEnemy.id).remove();
+          break;
+        }
+      }
+
       document.getElementById(`${id}${index}`).style.left = button.style.left;
       document.getElementById(`${id}${index}`).style.top = button.style.top;
 
@@ -124,6 +170,9 @@ export class HomeComponent {
   }
 
   changePosition(index: number, mainFigure: boolean, enemy?: boolean) {
+    this.figures.length = 0;
+    this.figuresEnemy.length = 0;
+
     let selectedFigure: Figure = mainFigure ?
       enemy ? this.mainFiguresEnemy[index] : this.mainFigures[index] :
       enemy ? this.secondaryFiguresEnemy[index] : this.secondaryFigures[index];
@@ -160,8 +209,12 @@ export class HomeComponent {
     }
 
     let indexToDelete = mainFigure ? index : index + 8;
-    this.figures.splice(indexToDelete, 1);
-    this.figuresEnemy.splice(indexToDelete, 1);
+
+    if (enemy) {
+      this.figuresEnemy.splice(indexToDelete, 1);
+    } else {
+      this.figures.splice(indexToDelete, 1);
+    }
 
     for (let i: number = 1; i < 8; i++) {
       if (mainFigure) {
@@ -234,6 +287,9 @@ export class HomeComponent {
   }
 
   pawnSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+    let pawnBeat: number = enemy ? -1 : 1;
+    this.createButton(selectedFigure, id, index, pawnBeat, i, enemy, undefined, true);
+
     this.createButton(selectedFigure, id, index, 0, i, enemy);
 
     if (!selectedFigure.firstMove) {

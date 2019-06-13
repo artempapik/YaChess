@@ -1,3 +1,4 @@
+//bug с вражеской ладьёй, слоном и ферзём
 //bug на короле клеточки не рисовать
 //bug ходить по очереди
 
@@ -115,6 +116,10 @@ export class HomeComponent {
             return;
           }
         }
+
+        if (figureEnemy.x === newx && figureEnemy.y === newy) {
+          return;
+        }
       }
     }
 
@@ -210,13 +215,10 @@ export class HomeComponent {
 
       selectedFigure.x = newx;
       selectedFigure.y = newy;
-
-      for (let buttonToMove of buttonsToMove) {
-        buttonToMove.remove();
-      }
-
-      buttonsToMove.length = 0;
       selectedFigure.firstMove = true;
+
+      buttonsToMove.forEach(button => button.remove());
+      buttonsToMove.length = 0;
     }.bind(this));
 
     buttonsToMove.push(button);
@@ -234,32 +236,17 @@ export class HomeComponent {
       enemy ? 'mainEnemy' : 'main' :
       enemy ? 'secondaryEnemy' : 'secondary';
 
-    for (let buttonToMove of this.buttonsToMove) {
-      buttonToMove.remove();
-    }
-
-    for (let buttonToMoveEnemy of this.buttonsToMoveEnemy) {
-      buttonToMoveEnemy.remove();
-    }
-
+    //чистка кнопок
+    this.buttonsToMove.forEach(button => button.remove());
+    this.buttonsToMoveEnemy.forEach(button => button.remove());
     this.buttonsToMove.length = 0;
     this.buttonsToMoveEnemy.length = 0;
 
-    for (let figure of this.mainFigures) {
-      this.figures.push(figure);
-    }
-
-    for (let figure of this.secondaryFigures) {
-      this.figures.push(figure);
-    }
-
-    for (let figureEnemy of this.mainFiguresEnemy) {
-      this.figuresEnemy.push(figureEnemy);
-    }
-
-    for (let figureEnemy of this.secondaryFiguresEnemy) {
-      this.figuresEnemy.push(figureEnemy);
-    }
+    //заполнение массива "своих" и вражеских фигур
+    this.mainFigures.forEach(figure => this.figures.push(figure));
+    this.secondaryFigures.forEach(figure => this.figures.push(figure));
+    this.mainFiguresEnemy.forEach(figure => this.figuresEnemy.push(figure));
+    this.secondaryFiguresEnemy.forEach(figure => this.figuresEnemy.push(figure));
 
     let indexToDelete = mainFigure ? index : index + 8;
 

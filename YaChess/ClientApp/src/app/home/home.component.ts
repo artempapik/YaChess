@@ -34,10 +34,10 @@ export class HomeComponent {
     }
   }
 
-  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, pawn?: boolean, enemy?: boolean) {
+  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, enemy: boolean, pawn?: boolean) {
     let newx: number = selectedFigure.x + x;
     let newy: number = enemy ?
-      selectedFigure.y - y: selectedFigure.y + y;
+      selectedFigure.y - y : selectedFigure.y + y;
 
     if (newx > 7 || newx < 0 || newy > 7 || newy < 0) {
       return;
@@ -168,21 +168,21 @@ export class HomeComponent {
         switch (index) {
           case 0:
           case 7:
-            this.rookSteps(selectedFigure, id, index, i);
+            this.rookSteps(selectedFigure, id, index, i, enemy);
             break;
           case 1:
           case 6:
-            this.knightSteps(selectedFigure, id, index, i);
+            this.knightSteps(selectedFigure, id, index, i, enemy);
             return;
           case 2:
           case 5:
-            this.bishopSteps(selectedFigure, id, index, i);
+            this.bishopSteps(selectedFigure, id, index, i, enemy);
             break;
           case 3:
-            this.queenSteps(selectedFigure, id, index, i);
+            this.queenSteps(selectedFigure, id, index, i, enemy);
             break;
           case 4:
-            this.kingSteps(selectedFigure, id, index, i);
+            this.kingSteps(selectedFigure, id, index, i, enemy);
             return;
         }
       } else {
@@ -192,52 +192,52 @@ export class HomeComponent {
     }
   }
 
-  rookSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, i, 0);
-    this.createButton(selectedFigure, id, index, -i, 0);
-    this.createButton(selectedFigure, id, index, 0, i);
-    this.createButton(selectedFigure, id, index, 0, -i);
+  rookSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, id, index, i, 0, enemy);
+    this.createButton(selectedFigure, id, index, -i, 0, enemy);
+    this.createButton(selectedFigure, id, index, 0, i, enemy);
+    this.createButton(selectedFigure, id, index, 0, -i, enemy);
   }
 
-  knightSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, i, i + 1);
-    this.createButton(selectedFigure, id, index, -i, i + 1);
-    this.createButton(selectedFigure, id, index, i, i - 3);
-    this.createButton(selectedFigure, id, index, -i, i - 3);
-    this.createButton(selectedFigure, id, index, i + 1, i - 2);
-    this.createButton(selectedFigure, id, index, i + 1, i);
-    this.createButton(selectedFigure, id, index, i - 3, i);
-    this.createButton(selectedFigure, id, index, i - 3, i - 2);
+  knightSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, id, index, i, i + 1, enemy);
+    this.createButton(selectedFigure, id, index, -i, i + 1, enemy);
+    this.createButton(selectedFigure, id, index, i, i - 3, enemy);
+    this.createButton(selectedFigure, id, index, -i, i - 3, enemy);
+    this.createButton(selectedFigure, id, index, i + 1, i - 2, enemy);
+    this.createButton(selectedFigure, id, index, i + 1, i, enemy);
+    this.createButton(selectedFigure, id, index, i - 3, i, enemy);
+    this.createButton(selectedFigure, id, index, i - 3, i - 2, enemy);
   }
 
-  bishopSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, i, i);
-    this.createButton(selectedFigure, id, index, -i, i);
-    this.createButton(selectedFigure, id, index, i, -i);
-    this.createButton(selectedFigure, id, index, -i, -i);
+  bishopSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, id, index, i, i, enemy);
+    this.createButton(selectedFigure, id, index, -i, i, enemy);
+    this.createButton(selectedFigure, id, index, i, -i, enemy);
+    this.createButton(selectedFigure, id, index, -i, -i, enemy);
   }
 
-  queenSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.rookSteps(selectedFigure, id, index, i);
-    this.bishopSteps(selectedFigure, id, index, i);
+  queenSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+    this.rookSteps(selectedFigure, id, index, i, enemy);
+    this.bishopSteps(selectedFigure, id, index, i, enemy);
   }
 
-  kingSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, i, 0);
-    this.createButton(selectedFigure, id, index, -i, 0);
-    this.createButton(selectedFigure, id, index, 0, i);
-    this.createButton(selectedFigure, id, index, 0, -i);
-    this.createButton(selectedFigure, id, index, i, i);
-    this.createButton(selectedFigure, id, index, i, -i);
-    this.createButton(selectedFigure, id, index, -i, i);
-    this.createButton(selectedFigure, id, index, -i, -i);
+  kingSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, id, index, i, 0, enemy);
+    this.createButton(selectedFigure, id, index, -i, 0, enemy);
+    this.createButton(selectedFigure, id, index, 0, i, enemy);
+    this.createButton(selectedFigure, id, index, 0, -i, enemy);
+    this.createButton(selectedFigure, id, index, i, i, enemy);
+    this.createButton(selectedFigure, id, index, i, -i, enemy);
+    this.createButton(selectedFigure, id, index, -i, i, enemy);
+    this.createButton(selectedFigure, id, index, -i, -i, enemy);
   }
 
   pawnSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, id, index, 0, i, undefined, enemy);
+    this.createButton(selectedFigure, id, index, 0, i, enemy);
 
     if (!selectedFigure.firstMove) {
-      this.createButton(selectedFigure, id, index, 0, i + 1, true, enemy);
+      this.createButton(selectedFigure, id, index, 0, i + 1, enemy, true);
     }
   }
 

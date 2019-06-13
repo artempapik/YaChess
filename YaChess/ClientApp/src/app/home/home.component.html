@@ -7,7 +7,7 @@
 </div>
 
 <div *ngFor="let figure of mainFiguresEnemy; let i = index">
-  <button [ngStyle]="setStyles(i, true, true)" id="mainEnemy{{i}}" (click)="changePosition(i, false, true)">me{{i}}</button>
+  <button [ngStyle]="setStyles(i, true, true)" id="mainEnemy{{i}}" (click)="changePosition(i, true, true)">me{{i}}</button>
 </div>
 
 <div *ngFor="let figure of secondaryFiguresEnemy; let i = index">

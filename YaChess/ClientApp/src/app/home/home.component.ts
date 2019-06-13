@@ -1,3 +1,6 @@
+//bug на короле клеточки не рисовать
+//bug ходить по очереди
+
 import { Figure } from '../services/figure';
 import { Component } from '@angular/core';
 
@@ -34,9 +37,11 @@ export class HomeComponent {
     }
   }
 
-  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, enemy: boolean, pawn?: boolean, secondary?: boolean) {
-    let newx: number = selectedFigure.x + x;
-    let newy: number = enemy ?
+  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number,
+    enemy: boolean, pawn?: boolean, secondary?: boolean, move?: number) {
+
+    let newx: number = selectedFigure.x + x; //предполагаемая координата x, где будет рисоваться клетка
+    let newy: number = enemy ? //предполагаемая координата y, где будет рисоваться клетка (в зависимости от "своей" или вражеской фигуры)
       selectedFigure.y - y : selectedFigure.y + y;
 
     if (newx > 7 || newx < 0 || newy > 7 || newy < 0) { //не выходить за пределы доски
@@ -46,9 +51,7 @@ export class HomeComponent {
     let figures: Figure[] = enemy ? this.figuresEnemy : this.figures;
     let figuresEnemy: Figure[] = enemy ? this.figures : this.figuresEnemy;
 
-    //
-
-    if (secondary) {
+    if (secondary) { //для пешки: если на правой верхней клетке есть враг - рисовать клетку
       let canBeat: boolean = false;
 
       for (let figureEnemy of figuresEnemy) {
@@ -63,18 +66,60 @@ export class HomeComponent {
       }
     }
 
-    //TODO
-    //рисовать 1 клеточку во вражеском направлении
-    if (!secondary) { //при совпадении будущих координат фигуры с вражескими - не рисовать ход (но для пешки - рисовать)
+    //при совпадении будущих координат фигуры с вражескими - не рисовать ход, кроме одной клетки
+    //(НО для пешки, коня, короля(?) - рисовать)
+    if (!secondary) {
       for (let figureEnemy of figuresEnemy) {
-        if (figureEnemy.x === newx && figureEnemy.y === newy) {
-          return;
+        if (move !== undefined) {
+          let xWatch: number = 0;
+          let yWatch: number = 0;
+
+          switch (move) {
+            //ладья
+            case 1: //вправо
+              xWatch = figureEnemy.x + 1;
+              yWatch = figureEnemy.y;
+              break;
+            case 2: //влево
+              xWatch = figureEnemy.x - 1;
+              yWatch = figureEnemy.y;
+              break;
+            case 3: //вверх
+              xWatch = figureEnemy.x;
+              yWatch = figureEnemy.y + 1;
+              break;
+            case 4: //вниз
+              xWatch = figureEnemy.x;
+              yWatch = figureEnemy.y - 1;
+              break;
+            //слон
+            case 5: //северо-восток
+              xWatch = figureEnemy.x + 1;
+              yWatch = figureEnemy.y + 1;
+              break;
+            case 6: //северо-запад
+              xWatch = figureEnemy.x - 1;
+              yWatch = figureEnemy.y + 1;
+              break;
+            case 7: //юго-восток
+              xWatch = figureEnemy.x + 1;
+              yWatch = figureEnemy.y - 1;
+              break;
+            case 8: //юго-запад
+              xWatch = figureEnemy.x - 1;
+              yWatch = figureEnemy.y - 1;
+              break;
+          }
+
+          if (xWatch === newx && yWatch === newy) {
+            return;
+          }
         }
       }
     }
 
     for (let figure of figures) {
-      if (figure.x === newx && figure.y === newy) {
+      if (figure.x === newx && figure.y === newy) { //новый ход не будет показываться на месте, где есть другая "своя" фигура
         return;
       }
 
@@ -139,17 +184,14 @@ export class HomeComponent {
     button.addEventListener("click", function () {
       for (let figureEnemy of figuresEnemy) {
         if (button.style.left === `${figureEnemy.coordx}px` && button.style.top === `${figureEnemy.coordy}px`) {
-          document.getElementById(figureEnemy.id).remove(); //удаление кнопки при совпадении
+          let buttonToDelete: HTMLElement = document.getElementById(figureEnemy.id);
 
-          if (figuresEnemy === this.figures) { //удаление фигуры из массива
-            console.log(`main`);
-            this.removeFigure(figureEnemy, this.mainFigures);
-            this.removeFigure(figureEnemy, this.secondaryFigures);
-          } else {
-            console.log(`not main`);
-            this.removeFigure(figureEnemy, this.mainFiguresEnemy);
-            this.removeFigure(figureEnemy, this.secondaryFiguresEnemy);
+          if (buttonToDelete !== null) {
+            buttonToDelete.remove(); //удаление кнопки врага при совпадении
           }
+
+          figureEnemy.x = -1;
+          figureEnemy.y = -1;
 
           break;
         }
@@ -178,14 +220,6 @@ export class HomeComponent {
     }.bind(this));
 
     buttonsToMove.push(button);
-  }
-
-  removeFigure(targetFigure: Figure, figures: Figure[]) {
-    for (let i: number = 0; i < figures.length; i++) {
-      if (targetFigure.x === figures[i].x && targetFigure.y === figures[i].y) {
-        figures.splice(i, 1);
-      }
-    }
   }
 
   changePosition(index: number, mainFigure: boolean, enemy?: boolean) {
@@ -265,10 +299,10 @@ export class HomeComponent {
   }
 
   rookSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, id, index, i, 0, enemy);
-    this.createButton(selectedFigure, id, index, -i, 0, enemy);
-    this.createButton(selectedFigure, id, index, 0, i, enemy);
-    this.createButton(selectedFigure, id, index, 0, -i, enemy);
+    this.createButton(selectedFigure, id, index, i, 0, enemy, undefined, undefined, 1);
+    this.createButton(selectedFigure, id, index, -i, 0, enemy, undefined, undefined, 2);
+    this.createButton(selectedFigure, id, index, 0, i, enemy, undefined, undefined, 3);
+    this.createButton(selectedFigure, id, index, 0, -i, enemy, undefined, undefined, 4);
   }
 
   knightSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
@@ -283,10 +317,10 @@ export class HomeComponent {
   }
 
   bishopSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, id, index, i, i, enemy);
-    this.createButton(selectedFigure, id, index, -i, i, enemy);
-    this.createButton(selectedFigure, id, index, i, -i, enemy);
-    this.createButton(selectedFigure, id, index, -i, -i, enemy);
+    this.createButton(selectedFigure, id, index, i, i, enemy, undefined, undefined, 5);
+    this.createButton(selectedFigure, id, index, -i, i, enemy, undefined, undefined, 6);
+    this.createButton(selectedFigure, id, index, i, -i, enemy, undefined, undefined, 7);
+    this.createButton(selectedFigure, id, index, -i, -i, enemy, undefined, undefined, 8);
   }
 
   queenSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {

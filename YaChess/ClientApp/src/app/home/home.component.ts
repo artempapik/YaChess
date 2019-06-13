@@ -139,7 +139,18 @@ export class HomeComponent {
     button.addEventListener("click", function () {
       for (let figureEnemy of figuresEnemy) {
         if (button.style.left === `${figureEnemy.coordx}px` && button.style.top === `${figureEnemy.coordy}px`) {
-          document.getElementById(figureEnemy.id).remove();
+          document.getElementById(figureEnemy.id).remove(); //удаление кнопки при совпадении
+
+          if (figuresEnemy === this.figures) { //удаление фигуры из массива
+            console.log(`main`);
+            this.removeFigure(figureEnemy, this.mainFigures);
+            this.removeFigure(figureEnemy, this.secondaryFigures);
+          } else {
+            console.log(`not main`);
+            this.removeFigure(figureEnemy, this.mainFiguresEnemy);
+            this.removeFigure(figureEnemy, this.secondaryFiguresEnemy);
+          }
+
           break;
         }
       }
@@ -167,6 +178,14 @@ export class HomeComponent {
     }.bind(this));
 
     buttonsToMove.push(button);
+  }
+
+  removeFigure(targetFigure: Figure, figures: Figure[]) {
+    for (let i: number = 0; i < figures.length; i++) {
+      if (targetFigure.x === figures[i].x && targetFigure.y === figures[i].y) {
+        figures.splice(i, 1);
+      }
+    }
   }
 
   changePosition(index: number, mainFigure: boolean, enemy?: boolean) {

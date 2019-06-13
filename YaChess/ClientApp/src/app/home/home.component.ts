@@ -7,26 +7,24 @@ import { Component } from '@angular/core';
 })
 
 export class HomeComponent {
+  readonly STEP: number = 50;
+
   mainFigures: Figure[] = [];
   secondaryFigures: Figure[] = [];
   buttonsToMove: HTMLButtonElement[] = [];
   figures: Figure[] = [];
 
   ngOnInit() {
-    const STEP = 50;
-
     let coordx: number = 600;
 
     for (let i: number = 0; i < 8; i++) {
       this.mainFigures.push(new Figure(i, 0, coordx, 400));
       this.secondaryFigures.push(new Figure(i, 1, coordx, 350));
-      coordx += STEP;
+      coordx += this.STEP;
     }
   }
 
   createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, isPawn?: boolean) {
-    const STEP = 50;
-
     let newx: number = selectedFigure.x + x;
     let newy: number = selectedFigure.y + y;
 
@@ -70,8 +68,8 @@ export class HomeComponent {
 
     let body = document.getElementsByTagName("body")[0];
 
-    button.style.left = `${selectedFigure.coordx + x * STEP}px`;
-    button.style.top = `${selectedFigure.coordy - y * STEP}px`;
+    button.style.left = `${selectedFigure.coordx + x * this.STEP}px`;
+    button.style.top = `${selectedFigure.coordy - y * this.STEP}px`;
 
     body.appendChild(button);
 
@@ -81,8 +79,8 @@ export class HomeComponent {
       document.getElementById(`${id}${index}`).style.left = button.style.left;
       document.getElementById(`${id}${index}`).style.top = button.style.top;
 
-      selectedFigure.coordx += x * STEP;
-      selectedFigure.coordy -= y * STEP;
+      selectedFigure.coordx += x * this.STEP;
+      selectedFigure.coordy -= y * this.STEP;
 
       selectedFigure.x = newx;
       selectedFigure.y = newy;
@@ -93,7 +91,7 @@ export class HomeComponent {
 
       buttonsToMove.length = 0;
       selectedFigure.firstMove = true;
-    });
+    }.bind(this));
 
     buttonsToMove.push(button);
   }

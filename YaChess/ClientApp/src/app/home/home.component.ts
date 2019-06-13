@@ -8,11 +8,17 @@ import { Component } from '@angular/core';
 
 export class HomeComponent {
   readonly STEP: number = 50;
+  readonly STEP_ENEMY: number = 50;
 
   mainFigures: Figure[] = [];
   secondaryFigures: Figure[] = [];
   buttonsToMove: HTMLButtonElement[] = [];
   figures: Figure[] = [];
+
+  mainFiguresEnemy: Figure[] = [];
+  secondaryFiguresEnemy: Figure[] = [];
+  buttonsToMoveEnemy: HTMLButtonElement[] = [];
+  figuresEnemy: Figure[] = [];
 
   ngOnInit() {
     let coordx: number = 600;
@@ -20,26 +26,40 @@ export class HomeComponent {
     for (let i: number = 0; i < 8; i++) {
       this.mainFigures.push(new Figure(i, 0, coordx, 400));
       this.secondaryFigures.push(new Figure(i, 1, coordx, 350));
+
+      this.mainFiguresEnemy.push(new Figure(i, 7, coordx, 50));
+      this.secondaryFiguresEnemy.push(new Figure(i, 6, coordx, 100));
+
       coordx += this.STEP;
     }
   }
 
-  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, isPawn?: boolean) {
+  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number, pawn?: boolean, enemy?: boolean) {
     let newx: number = selectedFigure.x + x;
-    let newy: number = selectedFigure.y + y;
+    let newy: number = enemy ?
+      selectedFigure.y - y: selectedFigure.y + y;
 
     if (newx > 7 || newx < 0 || newy > 7 || newy < 0) {
       return;
     }
 
-    for (let figure of this.figures) {
+    let figures: Figure[] = enemy ?
+      this.figuresEnemy : this.figures;
+
+    for (let figure of figures) {
       if (figure.x === newx && figure.y === newy) {
         return;
       }
 
-      if (isPawn) {
-        if (figure.x === newx && figure.y + 1 === newy) {
-          return;
+      if (pawn) {
+        if (enemy) {
+          if (figure.x === newx && figure.y - 1 === newy) {
+            return;
+          }
+        } else {
+          if (figure.x === newx && figure.y + 1 === newy) {
+            return;
+          }
         }
       }
 
@@ -69,18 +89,25 @@ export class HomeComponent {
     let body = document.getElementsByTagName("body")[0];
 
     button.style.left = `${selectedFigure.coordx + x * this.STEP}px`;
-    button.style.top = `${selectedFigure.coordy - y * this.STEP}px`;
+    button.style.top = enemy ?
+      `${selectedFigure.coordy + y * this.STEP}px` : `${selectedFigure.coordy - y * this.STEP}px`;
 
     body.appendChild(button);
 
-    let buttonsToMove: HTMLButtonElement[] = this.buttonsToMove;
+    let buttonsToMove: HTMLButtonElement[] = enemy ?
+      this.buttonsToMoveEnemy : this.buttonsToMove;
 
     button.addEventListener("click", function () {
       document.getElementById(`${id}${index}`).style.left = button.style.left;
       document.getElementById(`${id}${index}`).style.top = button.style.top;
 
       selectedFigure.coordx += x * this.STEP;
-      selectedFigure.coordy -= y * this.STEP;
+
+      if (enemy) {
+        selectedFigure.coordy += y * this.STEP;
+      } else {
+        selectedFigure.coordy -= y * this.STEP;
+      }
 
       selectedFigure.x = newx;
       selectedFigure.y = newy;
@@ -96,15 +123,25 @@ export class HomeComponent {
     buttonsToMove.push(button);
   }
 
-  changePosition(index: number, mainFigure: boolean) {
-    let selectedFigure: Figure = mainFigure ? this.mainFigures[index] : this.secondaryFigures[index];
-    let id: string = mainFigure ? 'main' : 'secondary';
+  changePosition(index: number, mainFigure: boolean, enemy?: boolean) {
+    let selectedFigure: Figure = mainFigure ?
+      enemy ? this.mainFiguresEnemy[index] : this.mainFigures[index] :
+      enemy ? this.secondaryFiguresEnemy[index] : this.secondaryFigures[index];
+
+    let id: string = mainFigure ?
+      enemy ? 'mainEnemy' : 'main' :
+      enemy ? 'secondaryEnemy' : 'secondary';
 
     for (let buttonToMove of this.buttonsToMove) {
       buttonToMove.remove();
     }
 
+    for (let buttonToMoveEnemy of this.buttonsToMoveEnemy) {
+      buttonToMoveEnemy.remove();
+    }
+
     this.buttonsToMove.length = 0;
+    this.buttonsToMoveEnemy.length = 0;
 
     for (let figure of this.mainFigures) {
       this.figures.push(figure);
@@ -114,8 +151,17 @@ export class HomeComponent {
       this.figures.push(figure);
     }
 
+    for (let figureEnemy of this.mainFiguresEnemy) {
+      this.figuresEnemy.push(figureEnemy);
+    }
+
+    for (let figureEnemy of this.secondaryFiguresEnemy) {
+      this.figuresEnemy.push(figureEnemy);
+    }
+
     let indexToDelete = mainFigure ? index : index + 8;
     this.figures.splice(indexToDelete, 1);
+    this.figuresEnemy.splice(indexToDelete, 1);
 
     for (let i: number = 1; i < 8; i++) {
       if (mainFigure) {
@@ -140,10 +186,35 @@ export class HomeComponent {
             return;
         }
       } else {
-        this.pawnSteps(selectedFigure, id, index, i);
+        this.pawnSteps(selectedFigure, id, index, i, enemy);
         return;
       }
     }
+  }
+
+  rookSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, i, 0);
+    this.createButton(selectedFigure, id, index, -i, 0);
+    this.createButton(selectedFigure, id, index, 0, i);
+    this.createButton(selectedFigure, id, index, 0, -i);
+  }
+
+  knightSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, i, i + 1);
+    this.createButton(selectedFigure, id, index, -i, i + 1);
+    this.createButton(selectedFigure, id, index, i, i - 3);
+    this.createButton(selectedFigure, id, index, -i, i - 3);
+    this.createButton(selectedFigure, id, index, i + 1, i - 2);
+    this.createButton(selectedFigure, id, index, i + 1, i);
+    this.createButton(selectedFigure, id, index, i - 3, i);
+    this.createButton(selectedFigure, id, index, i - 3, i - 2);
+  }
+
+  bishopSteps(selectedFigure: Figure, id: string, index: number, i: number) {
+    this.createButton(selectedFigure, id, index, i, i);
+    this.createButton(selectedFigure, id, index, -i, i);
+    this.createButton(selectedFigure, id, index, i, -i);
+    this.createButton(selectedFigure, id, index, -i, -i);
   }
 
   queenSteps(selectedFigure: Figure, id: string, index: number, i: number) {
@@ -162,36 +233,11 @@ export class HomeComponent {
     this.createButton(selectedFigure, id, index, -i, -i);
   }
 
-  rookSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, i, 0);
-    this.createButton(selectedFigure, id, index, -i, 0);
-    this.createButton(selectedFigure, id, index, 0, i);
-    this.createButton(selectedFigure, id, index, 0, -i);
-  }
-
-  bishopSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, i, i);
-    this.createButton(selectedFigure, id, index, -i, i);
-    this.createButton(selectedFigure, id, index, i, -i);
-    this.createButton(selectedFigure, id, index, -i, -i);
-  }
-
-  knightSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, i, i + 1);
-    this.createButton(selectedFigure, id, index, -i, i + 1);
-    this.createButton(selectedFigure, id, index, i, i - 3);
-    this.createButton(selectedFigure, id, index, -i, i - 3);
-    this.createButton(selectedFigure, id, index, i + 1, i - 2);
-    this.createButton(selectedFigure, id, index, i + 1, i);
-    this.createButton(selectedFigure, id, index, i - 3, i);
-    this.createButton(selectedFigure, id, index, i - 3, i - 2);
-  }
-
-  pawnSteps(selectedFigure: Figure, id: string, index: number, i: number) {
-    this.createButton(selectedFigure, id, index, 0, i);
+  pawnSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, id, index, 0, i, undefined, enemy);
 
     if (!selectedFigure.firstMove) {
-      this.createButton(selectedFigure, id, index, 0, i + 1, true);
+      this.createButton(selectedFigure, id, index, 0, i + 1, true, enemy);
     }
   }
 
@@ -223,8 +269,10 @@ export class HomeComponent {
     }
   }
 
-  setStyles(i: number, isMain: boolean) {
-    let arr: Figure[] = isMain ? this.mainFigures : this.secondaryFigures;
+  setStyles(i: number, mainFigure: boolean, enemy?: boolean) {
+    let arr: Figure[] = mainFigure ?
+      enemy ? this.mainFiguresEnemy : this.mainFigures :
+      enemy ? this.secondaryFiguresEnemy : this.secondaryFigures;
 
     return {
       'left': `${arr[i].coordx}px`,

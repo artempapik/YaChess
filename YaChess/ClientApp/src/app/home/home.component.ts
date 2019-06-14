@@ -1,5 +1,5 @@
-//bug на короле клеточки не рисовать
 //шах
+//на короле клеточки не рисовать
 //если пешка доходит до конца вражеского поля, она становится ферзём
 //рокировка
 
@@ -209,17 +209,17 @@ export class HomeComponent {
       }
 
       //отключение "своих" кнопок и включение кнопок противника
-      document.getElementById(selectedFigure.id).disabled = true;
+      (document.getElementById(selectedFigure.id) as HTMLButtonElement).disabled = true;
       for (let figure of figures) {
-        let button: HTMLButtonElement = document.getElementById(figure.id);
-
+        let button: HTMLButtonElement = document.getElementById(figure.id) as HTMLButtonElement;
+        
         if (button != null) {
           button.disabled = true;
         }
       }
 
       for (let figure of figuresEnemy) {
-        let button: HTMLButtonElement = document.getElementById(figure.id);
+        let button: HTMLButtonElement = document.getElementById(figure.id) as HTMLButtonElement;
 
         if (button != null) {
           button.disabled = false;
@@ -354,6 +354,48 @@ export class HomeComponent {
 
     if (!selectedFigure.firstMove) {
       this.createButton(selectedFigure, index, 0, i + 1, enemy, true);
+    }
+  }
+
+  fakeSteps() { //"фейковые" шаги для всех фигур, чтобы определить, стоит ли у них на пути вражеский король
+    //"фейковые" шаги для ладьи, слона и ферзя (по 8 в каждую сторону)
+    for (let i: number = 0; i < this.mainFigures.length; i++) {
+      if (this.mainFigures[i].x !== -1 && this.mainFigures[i].y !== -1) {
+        switch (i) {
+          case 0:
+          case 7:
+            this.rookSteps(this.mainFigures[i], i, i + 1, undefined);
+            break;
+          case 2:
+          case 5:
+            this.bishopSteps(this.mainFigures[i], i, i + 1, undefined);
+            break;
+          case 3:
+            this.queenSteps(this.mainFigures[i], i, i + 1, undefined);
+            break;
+        }
+      }
+    }
+
+    //"фейковые" шаги для коня и короля
+    for (let i: number = 0; i < this.mainFigures.length; i++) {
+      if (this.mainFigures[i].x !== -1 && this.mainFigures[i].y !== -1) {
+        switch (i) {
+          case 1:
+          case 6:
+            this.knightSteps(this.mainFigures[i], i, i + 1, undefined);
+            break;
+          case 4:
+            this.kingSteps(this.mainFigures[i], i, i + 1, undefined);
+            break;
+        }
+      }
+    }
+
+    for (let i: number = 0; i < this.secondaryFigures.length; i++) {
+      if (this.secondaryFigures[i].x !== -1 && this.secondaryFigures[i].y !== -1) {
+        this.pawnSteps(this.secondaryFigures[i], i, i + 1, undefined);
+      }
     }
   }
 

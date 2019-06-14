@@ -1,5 +1,7 @@
 //bug на короле клеточки не рисовать
-//bug ходить по очереди
+//шах
+//если пешка доходит до конца вражеского поля, она становится ферзём
+//рокировка
 
 import { Figure } from '../services/figure';
 import { Component } from '@angular/core';
@@ -192,18 +194,35 @@ export class HomeComponent {
       this.buttonsToMoveEnemy : this.buttonsToMove;
 
     button.addEventListener("click", function () {
-      for (let figureEnemy of figuresEnemy) {
-        if (button.style.left === `${figureEnemy.coordx}px` && button.style.top === `${figureEnemy.coordy}px`) {
-          let buttonToDelete: HTMLElement = document.getElementById(figureEnemy.id);
+      for (let figure of figuresEnemy) {
+        if (button.style.left === `${figure.coordx}px` && button.style.top === `${figure.coordy}px`) {
+          let buttonToDelete: HTMLElement = document.getElementById(figure.id);
 
           if (buttonToDelete !== null) {
             buttonToDelete.remove(); //удаление кнопки врага при совпадении
           }
 
-          figureEnemy.x = -1;
-          figureEnemy.y = -1;
-          
+          figure.x = -1;
+          figure.y = -1;
           break;
+        }
+      }
+
+      //отключение "своих" кнопок и включение кнопок противника
+      document.getElementById(selectedFigure.id).disabled = true;
+      for (let figure of figures) {
+        let button: HTMLButtonElement = document.getElementById(figure.id);
+
+        if (button != null) {
+          button.disabled = true;
+        }
+      }
+
+      for (let figure of figuresEnemy) {
+        let button: HTMLButtonElement = document.getElementById(figure.id);
+
+        if (button != null) {
+          button.disabled = false;
         }
       }
 

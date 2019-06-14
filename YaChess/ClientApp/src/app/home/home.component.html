@@ -7,9 +7,9 @@
 </div>
 
 <div *ngFor="let figure of mainFiguresEnemy; let i = index">
-  <button [ngStyle]="setStyles(i, true, true)" id="mainEnemy{{i}}" (click)="changePosition(i, true, true)"></button>
+  <button [ngStyle]="setStyles(i, true, true)" id="mainEnemy{{i}}" (click)="changePosition(i, true, true)" disabled></button>
 </div>
 
 <div *ngFor="let figure of secondaryFiguresEnemy; let i = index">
-  <button [ngStyle]="setStyles(i, false, true)" id="secondaryEnemy{{i}}" (click)="changePosition(i, false, true)"></button>
+  <button [ngStyle]="setStyles(i, false, true)" id="secondaryEnemy{{i}}" (click)="changePosition(i, false, true)" disabled></button>
 </div>

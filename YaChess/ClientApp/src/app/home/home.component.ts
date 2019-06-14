@@ -108,6 +108,7 @@ export class HomeComponent {
               yWatch = enemy ? figureEnemy.y - 1 : figureEnemy.y + 1;
               break;
             case 7: //юго-восток
+              //NET
               if (enemy) {
                 xWatch = figureEnemy.x + 1;
                 yWatch = figureEnemy.y + 1;

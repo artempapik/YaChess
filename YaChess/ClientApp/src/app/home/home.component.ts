@@ -1,4 +1,4 @@
-//bug с вражеской ладьёй, слоном и ферзём
+//просмотреть предполагаемые баги с вражеской ладьёй и слоном (а заодно и ферзём)
 //bug на короле клеточки не рисовать
 //bug ходить по очереди
 
@@ -76,6 +76,11 @@ export class HomeComponent {
           let yWatch: number = 0;
 
           switch (move) {
+            //пешка
+            case 0:
+              xWatch = figureEnemy.x;
+              yWatch = figureEnemy.y;
+              break;
             //ладья
             case 1: //вправо
               xWatch = figureEnemy.x + 1;
@@ -87,38 +92,44 @@ export class HomeComponent {
               break;
             case 3: //вверх
               xWatch = figureEnemy.x;
-              yWatch = figureEnemy.y + 1;
+              yWatch = enemy ? figureEnemy.y - 1 : figureEnemy.y + 1;       
               break;
             case 4: //вниз
               xWatch = figureEnemy.x;
-              yWatch = figureEnemy.y - 1;
+              yWatch = enemy ? figureEnemy.y + 1 : figureEnemy.y - 1;
               break;
             //слон
             case 5: //северо-восток
               xWatch = figureEnemy.x + 1;
-              yWatch = figureEnemy.y + 1;
+              yWatch = enemy ? figureEnemy.y - 1 : figureEnemy.y + 1;
               break;
             case 6: //северо-запад
               xWatch = figureEnemy.x - 1;
-              yWatch = figureEnemy.y + 1;
+              yWatch = enemy ? figureEnemy.y - 1 : figureEnemy.y + 1;
               break;
             case 7: //юго-восток
-              xWatch = figureEnemy.x + 1;
-              yWatch = figureEnemy.y - 1;
+              if (enemy) {
+                xWatch = figureEnemy.x + 1;
+                yWatch = figureEnemy.y + 1;
+              } else {
+                xWatch = figureEnemy.x + 1;
+                yWatch = figureEnemy.y - 1;
+              }
               break;
             case 8: //юго-запад
-              xWatch = figureEnemy.x - 1;
-              yWatch = figureEnemy.y - 1;
+              if (enemy) {
+                xWatch = figureEnemy.x + 1;
+                yWatch = figureEnemy.y + 1;
+              } else {
+                xWatch = figureEnemy.x - 1;
+                yWatch = figureEnemy.y - 1;
+              }
               break;
           }
 
           if (xWatch === newx && yWatch === newy) {
             return;
           }
-        }
-
-        if (figureEnemy.x === newx && figureEnemy.y === newy) {
-          return;
         }
       }
     }
@@ -330,7 +341,7 @@ export class HomeComponent {
     let pawnBeat: number = enemy ? -1 : 1;
     this.createButton(selectedFigure, id, index, pawnBeat, i, enemy, undefined, true);
 
-    this.createButton(selectedFigure, id, index, 0, i, enemy);
+    this.createButton(selectedFigure, id, index, 0, i, enemy, undefined, undefined, 0);
 
     if (!selectedFigure.firstMove) {
       this.createButton(selectedFigure, id, index, 0, i + 1, enemy, true);

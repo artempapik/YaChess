@@ -11,7 +11,6 @@ import { Component } from '@angular/core';
 
 export class HomeComponent {
   readonly STEP: number = 50;
-  readonly STEP_ENEMY: number = 50;
 
   mainFigures: Figure[] = [];
   secondaryFigures: Figure[] = [];
@@ -29,7 +28,6 @@ export class HomeComponent {
     for (let i: number = 0; i < 8; i++) {
       this.mainFigures.push(new Figure(`main${i}`, i, 0, coordx, 400));
       this.secondaryFigures.push(new Figure(`secondary${i}`,i, 1, coordx, 350));
-
       this.mainFiguresEnemy.push(new Figure(`mainEnemy${i}`, i, 7, coordx, 50));
       this.secondaryFiguresEnemy.push(new Figure(`secondaryEnemy${i}`, i, 6, coordx, 100));
 
@@ -37,9 +35,7 @@ export class HomeComponent {
     }
   }
 
-  createButton(selectedFigure: Figure, index: number, x: number, y: number,
-    enemy: boolean, pawn?: boolean, secondary?: boolean, move?: number) {
-
+  createButton(selectedFigure: Figure, index: number, x: number, y: number, enemy: boolean, pawn?: boolean, secondary?: boolean, move?: number) {
     let newx: number = selectedFigure.x + x; //предполагаемая координата x, где будет рисоваться клетка
     let newy: number = enemy ? //предполагаемая координата y, где будет рисоваться клетка (в зависимости от "своей" или вражеской фигуры)
       selectedFigure.y - y : selectedFigure.y + y;
@@ -70,8 +66,8 @@ export class HomeComponent {
     if (!secondary) {
       for (let figureEnemy of figuresEnemy) {
         if (move !== undefined) {
-          let xWatch: number = 0;
-          let yWatch: number = 0;
+          let xWatch: number;
+          let yWatch: number;
 
           switch (move) {
             case 0: //пешка
@@ -89,7 +85,7 @@ export class HomeComponent {
               break;
             case 3: //вверх
               xWatch = figureEnemy.x;
-              yWatch = enemy ? figureEnemy.y - 1 : figureEnemy.y + 1;       
+              yWatch = enemy ? figureEnemy.y - 1 : figureEnemy.y + 1;
               break;
             case 4: //вниз
               xWatch = figureEnemy.x;
@@ -121,6 +117,33 @@ export class HomeComponent {
       }
     }
 
+    let allFigures: Figure[] = [];
+    figuresEnemy.forEach(figure => allFigures.push(figure));
+    figures.forEach(figure => allFigures.push(figure));
+
+    for (let figure of allFigures) { //валидация "перепрыгиваний" для всех фигур
+      switch (index) {
+        case 0:
+        case 7:
+          if (this.rookValidation(newx, newy, figure, selectedFigure)) {
+            return;
+          }
+          break;
+        case 2:
+        case 5:
+          if (this.bishopValidation(newx, newy, figure, selectedFigure)) {
+            return;
+          }
+          break;
+        case 3:
+          if (this.rookValidation(newx, newy, figure, selectedFigure) || this.bishopValidation(newx, newy, figure, selectedFigure)) {
+            return;
+          }
+      }
+    }
+
+    allFigures.length = 0;
+
     for (let figure of figures) {
       if (figure.x === newx && figure.y === newy) { //новый ход не будет показываться на месте, где есть другая "своя" фигура
         return;
@@ -149,30 +172,16 @@ export class HomeComponent {
           }
         }
       }
-
-      switch (index) {
-        case 0:
-        case 7:
-          if (this.rookValidation(newx, newy, figure, selectedFigure)) {
-            return;
-          }
-          break;
-        case 2:
-        case 5:
-          if (this.bishopValidation(newx, newy, figure, selectedFigure)) {
-            return;
-          }
-          break;
-        case 3:
-          if (this.rookValidation(newx, newy, figure, selectedFigure) || this.bishopValidation(newx, newy, figure, selectedFigure)) {
-            return;
-          }
-      }
     }
 
     let button = document.createElement("button");
+    button.style.border = '0';
+    button.style.background = 'none';
+    button.style.color = '#e62b2b';
 
-    button.innerHTML = "•";
+    button.style.fontSize = '25px';
+    button.innerHTML = '•';
+
     button.style.left = `${selectedFigure.coordx + x * this.STEP}px`;
     button.style.top = enemy ?
       `${selectedFigure.coordy + y * this.STEP}px` : `${selectedFigure.coordy - y * this.STEP}px`;
@@ -193,7 +202,7 @@ export class HomeComponent {
 
           figureEnemy.x = -1;
           figureEnemy.y = -1;
-
+          
           break;
         }
       }

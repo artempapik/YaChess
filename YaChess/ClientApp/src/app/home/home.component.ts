@@ -1,4 +1,3 @@
-//просмотреть предполагаемые баги с вражеской ладьёй и слоном (а заодно и ферзём)
 //bug на короле клеточки не рисовать
 //bug ходить по очереди
 
@@ -38,7 +37,7 @@ export class HomeComponent {
     }
   }
 
-  createButton(selectedFigure: Figure, id: string, index: number, x: number, y: number,
+  createButton(selectedFigure: Figure, index: number, x: number, y: number,
     enemy: boolean, pawn?: boolean, secondary?: boolean, move?: number) {
 
     let newx: number = selectedFigure.x + x; //предполагаемая координата x, где будет рисоваться клетка
@@ -67,8 +66,7 @@ export class HomeComponent {
       }
     }
 
-    //при совпадении будущих координат фигуры с вражескими - не рисовать ход, кроме одной клетки
-    //(НО для пешки, коня, короля(?) - рисовать)
+    //при совпадении будущих координат фигуры с вражескими - не рисовать ход, кроме одной клетки (НО для пешки, коня, короля(?) - рисовать)
     if (!secondary) {
       for (let figureEnemy of figuresEnemy) {
         if (move !== undefined) {
@@ -76,8 +74,7 @@ export class HomeComponent {
           let yWatch: number = 0;
 
           switch (move) {
-            //пешка
-            case 0:
+            case 0: //пешка
               xWatch = figureEnemy.x;
               yWatch = figureEnemy.y;
               break;
@@ -108,23 +105,12 @@ export class HomeComponent {
               yWatch = enemy ? figureEnemy.y - 1 : figureEnemy.y + 1;
               break;
             case 7: //юго-восток
-              //NET
-              if (enemy) {
-                xWatch = figureEnemy.x + 1;
-                yWatch = figureEnemy.y + 1;
-              } else {
-                xWatch = figureEnemy.x + 1;
-                yWatch = figureEnemy.y - 1;
-              }
+              xWatch = figureEnemy.x + 1;
+              yWatch = enemy ? figureEnemy.y + 1 : figureEnemy.y - 1;
               break;
             case 8: //юго-запад
-              if (enemy) {
-                xWatch = figureEnemy.x + 1;
-                yWatch = figureEnemy.y + 1;
-              } else {
-                xWatch = figureEnemy.x - 1;
-                yWatch = figureEnemy.y - 1;
-              }
+              xWatch = figureEnemy.x - 1;
+              yWatch = enemy ? figureEnemy.y + 1 : figureEnemy.y - 1;
               break;
           }
 
@@ -185,15 +171,13 @@ export class HomeComponent {
     }
 
     let button = document.createElement("button");
+
     button.innerHTML = "•";
-
-    let body = document.getElementsByTagName("body")[0];
-
     button.style.left = `${selectedFigure.coordx + x * this.STEP}px`;
     button.style.top = enemy ?
       `${selectedFigure.coordy + y * this.STEP}px` : `${selectedFigure.coordy - y * this.STEP}px`;
 
-    body.appendChild(button);
+    document.getElementsByTagName("body")[0].appendChild(button);
 
     let buttonsToMove: HTMLButtonElement[] = enemy ?
       this.buttonsToMoveEnemy : this.buttonsToMove;
@@ -214,8 +198,8 @@ export class HomeComponent {
         }
       }
 
-      document.getElementById(`${id}${index}`).style.left = button.style.left;
-      document.getElementById(`${id}${index}`).style.top = button.style.top;
+      document.getElementById(selectedFigure.id).style.left = button.style.left;
+      document.getElementById(selectedFigure.id).style.top = button.style.top;
 
       selectedFigure.coordx += x * this.STEP;
 
@@ -244,10 +228,6 @@ export class HomeComponent {
       enemy ? this.mainFiguresEnemy[index] : this.mainFigures[index] :
       enemy ? this.secondaryFiguresEnemy[index] : this.secondaryFigures[index];
 
-    let id: string = mainFigure ?
-      enemy ? 'mainEnemy' : 'main' :
-      enemy ? 'secondaryEnemy' : 'secondary';
-
     //чистка кнопок
     this.buttonsToMove.forEach(button => button.remove());
     this.buttonsToMoveEnemy.forEach(button => button.remove());
@@ -273,79 +253,79 @@ export class HomeComponent {
         switch (index) {
           case 0:
           case 7:
-            this.rookSteps(selectedFigure, id, index, i, enemy);
+            this.rookSteps(selectedFigure, index, i, enemy);
             break;
           case 1:
           case 6:
-            this.knightSteps(selectedFigure, id, index, i, enemy);
+            this.knightSteps(selectedFigure, index, i, enemy);
             return;
           case 2:
           case 5:
-            this.bishopSteps(selectedFigure, id, index, i, enemy);
+            this.bishopSteps(selectedFigure, index, i, enemy);
             break;
           case 3:
-            this.queenSteps(selectedFigure, id, index, i, enemy);
+            this.queenSteps(selectedFigure, index, i, enemy);
             break;
           case 4:
-            this.kingSteps(selectedFigure, id, index, i, enemy);
+            this.kingSteps(selectedFigure, index, i, enemy);
             return;
         }
       } else {
-        this.pawnSteps(selectedFigure, id, index, i, enemy);
+        this.pawnSteps(selectedFigure, index, i, enemy);
         return;
       }
     }
   }
 
-  rookSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, id, index, i, 0, enemy, undefined, undefined, 1);
-    this.createButton(selectedFigure, id, index, -i, 0, enemy, undefined, undefined, 2);
-    this.createButton(selectedFigure, id, index, 0, i, enemy, undefined, undefined, 3);
-    this.createButton(selectedFigure, id, index, 0, -i, enemy, undefined, undefined, 4);
+  rookSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, index, i, 0, enemy, undefined, undefined, 1);
+    this.createButton(selectedFigure, index, -i, 0, enemy, undefined, undefined, 2);
+    this.createButton(selectedFigure, index, 0, i, enemy, undefined, undefined, 3);
+    this.createButton(selectedFigure, index, 0, -i, enemy, undefined, undefined, 4);
   }
 
-  knightSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, id, index, i, i + 1, enemy);
-    this.createButton(selectedFigure, id, index, -i, i + 1, enemy);
-    this.createButton(selectedFigure, id, index, i, i - 3, enemy);
-    this.createButton(selectedFigure, id, index, -i, i - 3, enemy);
-    this.createButton(selectedFigure, id, index, i + 1, i - 2, enemy);
-    this.createButton(selectedFigure, id, index, i + 1, i, enemy);
-    this.createButton(selectedFigure, id, index, i - 3, i, enemy);
-    this.createButton(selectedFigure, id, index, i - 3, i - 2, enemy);
+  knightSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, index, i, i + 1, enemy);
+    this.createButton(selectedFigure, index, -i, i + 1, enemy);
+    this.createButton(selectedFigure, index, i, i - 3, enemy);
+    this.createButton(selectedFigure, index, -i, i - 3, enemy);
+    this.createButton(selectedFigure, index, i + 1, i - 2, enemy);
+    this.createButton(selectedFigure, index, i + 1, i, enemy);
+    this.createButton(selectedFigure, index, i - 3, i, enemy);
+    this.createButton(selectedFigure, index, i - 3, i - 2, enemy);
   }
 
-  bishopSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, id, index, i, i, enemy, undefined, undefined, 5);
-    this.createButton(selectedFigure, id, index, -i, i, enemy, undefined, undefined, 6);
-    this.createButton(selectedFigure, id, index, i, -i, enemy, undefined, undefined, 7);
-    this.createButton(selectedFigure, id, index, -i, -i, enemy, undefined, undefined, 8);
+  bishopSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, index, i, i, enemy, undefined, undefined, 5);
+    this.createButton(selectedFigure, index, -i, i, enemy, undefined, undefined, 6);
+    this.createButton(selectedFigure, index, i, -i, enemy, undefined, undefined, 7);
+    this.createButton(selectedFigure, index, -i, -i, enemy, undefined, undefined, 8);
   }
 
-  queenSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.rookSteps(selectedFigure, id, index, i, enemy);
-    this.bishopSteps(selectedFigure, id, index, i, enemy);
+  queenSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
+    this.rookSteps(selectedFigure, index, i, enemy);
+    this.bishopSteps(selectedFigure, index, i, enemy);
   }
 
-  kingSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, id, index, i, 0, enemy);
-    this.createButton(selectedFigure, id, index, -i, 0, enemy);
-    this.createButton(selectedFigure, id, index, 0, i, enemy);
-    this.createButton(selectedFigure, id, index, 0, -i, enemy);
-    this.createButton(selectedFigure, id, index, i, i, enemy);
-    this.createButton(selectedFigure, id, index, i, -i, enemy);
-    this.createButton(selectedFigure, id, index, -i, i, enemy);
-    this.createButton(selectedFigure, id, index, -i, -i, enemy);
+  kingSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
+    this.createButton(selectedFigure, index, i, 0, enemy);
+    this.createButton(selectedFigure, index, -i, 0, enemy);
+    this.createButton(selectedFigure, index, 0, i, enemy);
+    this.createButton(selectedFigure, index, 0, -i, enemy);
+    this.createButton(selectedFigure, index, i, i, enemy);
+    this.createButton(selectedFigure, index, i, -i, enemy);
+    this.createButton(selectedFigure, index, -i, i, enemy);
+    this.createButton(selectedFigure, index, -i, -i, enemy);
   }
 
-  pawnSteps(selectedFigure: Figure, id: string, index: number, i: number, enemy: boolean) {
+  pawnSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
     let pawnBeat: number = enemy ? -1 : 1;
-    this.createButton(selectedFigure, id, index, pawnBeat, i, enemy, undefined, true);
+    this.createButton(selectedFigure, index, pawnBeat, i, enemy, undefined, true);
 
-    this.createButton(selectedFigure, id, index, 0, i, enemy, undefined, undefined, 0);
+    this.createButton(selectedFigure, index, 0, i, enemy, undefined, undefined, 0);
 
     if (!selectedFigure.firstMove) {
-      this.createButton(selectedFigure, id, index, 0, i + 1, enemy, true);
+      this.createButton(selectedFigure, index, 0, i + 1, enemy, true);
     }
   }
 
@@ -382,9 +362,39 @@ export class HomeComponent {
       enemy ? this.mainFiguresEnemy : this.mainFigures :
       enemy ? this.secondaryFiguresEnemy : this.secondaryFigures;
 
+    let imgUrl: string = enemy ? 'pawnEnemy' : 'pawn';
+
+    if (mainFigure) {
+      switch (i) {
+        case 0:
+        case 7:
+          imgUrl = 'rook';
+          break;
+        case 1:
+        case 6:
+          imgUrl = 'knight';
+          break;
+        case 2:
+        case 5:
+          imgUrl = 'bishop';
+          break;
+        case 3:
+          imgUrl = 'queen';
+          break;
+        case 4:
+          imgUrl = 'king';
+          break;
+      }
+
+      if (enemy) {
+        imgUrl += 'Enemy';
+      }
+    }
+
     return {
       'left': `${arr[i].coordx}px`,
-      'top': `${arr[i].coordy}px`
+      'top': `${arr[i].coordy}px`,
+      'background': `url(${imgUrl}.png)`
     };
   }
 }

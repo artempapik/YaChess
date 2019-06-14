@@ -1,15 +1,26 @@
-<div *ngFor="let figure of mainFigures; let i = index">
-  <button [ngStyle]="setStyles(i, true)" id="main{{i}}" (click)="changePosition(i, true)"></button>
-</div>
-
-<div *ngFor="let figure of secondaryFigures; let i = index">
-  <button [ngStyle]="setStyles(i, false)" id="secondary{{i}}" (click)="changePosition(i, false)"></button>
-</div>
-
-<div *ngFor="let figure of mainFiguresEnemy; let i = index">
-  <button [ngStyle]="setStyles(i, true, true)" id="mainEnemy{{i}}" (click)="changePosition(i, true, true)" disabled></button>
-</div>
-
-<div *ngFor="let figure of secondaryFiguresEnemy; let i = index">
-  <button [ngStyle]="setStyles(i, false, true)" id="secondaryEnemy{{i}}" (click)="changePosition(i, false, true)" disabled></button>
-</div>
+<table>
+  <tr>
+    <td *ngFor="let figure of mainFigures; let i = index">
+      <button [ngStyle]="setStyles(i, true)" id="main{{i}}" (click)="changePosition(i, true)"></button>
+    </td>
+  </tr>
+  <tr>
+    <td *ngFor="let figure of secondaryFigures; let i = index">
+      <button [ngStyle]="setStyles(i, false)" id="secondary{{i}}" (click)="changePosition(i, false)"></button>
+    </td>
+  </tr>
+  <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr>
+    <td *ngFor="let figure of mainFiguresEnemy; let i = index">
+      <button [ngStyle]="setStyles(i, true, true)" id="mainEnemy{{i}}" (click)="changePosition(i, true, true)" disabled></button>
+    </td>
+  </tr>
+  <tr>
+    <td *ngFor="let figure of secondaryFiguresEnemy; let i = index">
+      <button [ngStyle]="setStyles(i, false, true)" id="secondaryEnemy{{i}}" (click)="changePosition(i, false, true)" disabled></button>
+    </td>
+  </tr>
+</table>

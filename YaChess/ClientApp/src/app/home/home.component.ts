@@ -1,4 +1,4 @@
-//шах
+//шах и мат
 //на короле клеточки не рисовать
 //если пешка доходит до конца вражеского поля, она становится ферзём
 //рокировка
@@ -179,9 +179,9 @@ export class HomeComponent {
     let button = document.createElement("button");
     button.style.border = '0';
     button.style.background = 'none';
-    button.style.color = '#e62b2b';
+    button.style.color = '#d51d1d';
 
-    button.style.fontSize = '25px';
+    button.style.fontSize = '30px';
     button.innerHTML = '•';
 
     button.style.left = `${selectedFigure.coordx + x * this.STEP}px`;

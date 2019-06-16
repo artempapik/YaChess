@@ -24,6 +24,8 @@ export class HomeComponent {
   buttonsToMoveEnemy: HTMLButtonElement[] = [];
   figuresEnemy: Figure[] = [];
 
+  fakeSteps: HTMLButtonElement[] = [];
+
   ngOnInit() {
     let coordx: number = 600;
 
@@ -37,7 +39,8 @@ export class HomeComponent {
     }
   }
 
-  createButton(selectedFigure: Figure, index: number, x: number, y: number, enemy: boolean, pawn?: boolean, secondary?: boolean, move?: number) {
+  createButton(selectedFigure: Figure, index: number, x: number, y: number,
+    enemy: boolean, pawn?: boolean, secondary?: boolean, move?: number, check?: boolean, figureToInclude?: Figure) {
     let newx: number = selectedFigure.x + x; //предполагаемая координата x, где будет рисоваться клетка
     let newy: number = enemy ? //предполагаемая координата y, где будет рисоваться клетка (в зависимости от "своей" или вражеской фигуры)
       selectedFigure.y - y : selectedFigure.y + y;
@@ -146,6 +149,35 @@ export class HomeComponent {
 
     allFigures.length = 0;
 
+    //
+
+    if (check) { //если делаются "фейковые" ходы, включить в проверку ту 1 фигуру, относительно которой до этого рисовались клетки
+      if (figureToInclude.x === newx && figureToInclude.y === newy) {
+        return;
+      }
+
+      switch (index) {
+        case 0:
+        case 7:
+          if (this.rookValidation(newx, newy, figureToInclude, selectedFigure)) {
+            return;
+          }
+          break;
+        case 2:
+        case 5:
+          if (this.bishopValidation(newx, newy, figureToInclude, selectedFigure)) {
+            return;
+          }
+          break;
+        case 3:
+          if (this.rookValidation(newx, newy, figureToInclude, selectedFigure) || this.bishopValidation(newx, newy, figureToInclude, selectedFigure)) {
+            return;
+          }
+      }
+    }
+
+    //
+
     for (let figure of figures) {
       if (figure.x === newx && figure.y === newy) { //новый ход не будет показываться на месте, где есть другая "своя" фигура
         return;
@@ -176,6 +208,23 @@ export class HomeComponent {
       }
     }
 
+    //определяем, совпадает ли координата, которая рисовалась бы, с координатой вражеского короля (beta)
+
+    let buttonCoordx: number = selectedFigure.coordx + x * this.STEP;
+    let buttonCoordy: number = enemy ? selectedFigure.coordy + y * this.STEP : selectedFigure.coordy - y * this.STEP;
+
+    if (check) {
+      let kingEnemy: Figure = enemy ? this.mainFigures[4] : this.mainFiguresEnemy[4];
+
+      if (buttonCoordx === kingEnemy.coordx && buttonCoordy === kingEnemy.coordy) {
+        console.log(`check`);
+      }
+
+      return;
+    }
+
+    //
+
     let button = document.createElement("button");
     button.style.border = '0';
     button.style.background = 'none';
@@ -184,14 +233,21 @@ export class HomeComponent {
     button.style.fontSize = '30px';
     button.innerHTML = '•';
 
-    button.style.left = `${selectedFigure.coordx + x * this.STEP}px`;
-    button.style.top = enemy ?
-      `${selectedFigure.coordy + y * this.STEP}px` : `${selectedFigure.coordy - y * this.STEP}px`;
+    button.style.left = `${buttonCoordx}px`;
+    button.style.top = `${buttonCoordy}px`;
 
     document.getElementsByTagName("body")[0].appendChild(button);
 
     let buttonsToMove: HTMLButtonElement[] = enemy ?
       this.buttonsToMoveEnemy : this.buttonsToMove;
+
+    //
+
+    this.fakeSteps.push(button);
+
+    //
+
+    if (check) return;
 
     button.addEventListener("click", function () {
       for (let figure of figuresEnemy) {
@@ -243,12 +299,19 @@ export class HomeComponent {
 
       buttonsToMove.forEach(button => button.remove());
       buttonsToMove.length = 0;
+
+      //"фейковые" шаги для всех фигур
+      this.doFakeSteps(enemy, selectedFigure);
     }.bind(this));
 
     buttonsToMove.push(button);
   }
 
   changePosition(index: number, mainFigure: boolean, enemy?: boolean) {
+    //чистка "фейковых" кнопок (временно)
+    this.fakeSteps.forEach(button => button.remove());
+    this.fakeSteps.length = 0;
+
     this.figures.length = 0;
     this.figuresEnemy.length = 0;
 
@@ -281,120 +344,121 @@ export class HomeComponent {
         switch (index) {
           case 0:
           case 7:
-            this.rookSteps(selectedFigure, index, i, enemy);
+            this.rookSteps(selectedFigure, index, i, enemy, false, undefined);
             break;
           case 1:
           case 6:
-            this.knightSteps(selectedFigure, index, i, enemy);
+            this.knightSteps(selectedFigure, index, i, enemy, false, undefined);
             return;
           case 2:
           case 5:
-            this.bishopSteps(selectedFigure, index, i, enemy);
+            this.bishopSteps(selectedFigure, index, i, enemy, false, undefined);
             break;
           case 3:
-            this.queenSteps(selectedFigure, index, i, enemy);
+            this.queenSteps(selectedFigure, index, i, enemy, false, undefined);
             break;
           case 4:
-            this.kingSteps(selectedFigure, index, i, enemy);
+            this.kingSteps(selectedFigure, index, i, enemy, false, undefined);
             return;
         }
       } else {
-        this.pawnSteps(selectedFigure, index, i, enemy);
+        this.pawnSteps(selectedFigure, index, i, enemy, false);
         return;
       }
     }
   }
 
-  rookSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, index, i, 0, enemy, undefined, undefined, 1);
-    this.createButton(selectedFigure, index, -i, 0, enemy, undefined, undefined, 2);
-    this.createButton(selectedFigure, index, 0, i, enemy, undefined, undefined, 3);
-    this.createButton(selectedFigure, index, 0, -i, enemy, undefined, undefined, 4);
+  rookSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean, check: boolean, figureToInclude: Figure) {
+    this.createButton(selectedFigure, index, i, 0, enemy, undefined, undefined, 1, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, 0, enemy, undefined, undefined, 2, check, figureToInclude);
+    this.createButton(selectedFigure, index, 0, i, enemy, undefined, undefined, 3, check, figureToInclude);
+    this.createButton(selectedFigure, index, 0, -i, enemy, undefined, undefined, 4, check, figureToInclude);
   }
 
-  knightSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, index, i, i + 1, enemy);
-    this.createButton(selectedFigure, index, -i, i + 1, enemy);
-    this.createButton(selectedFigure, index, i, i - 3, enemy);
-    this.createButton(selectedFigure, index, -i, i - 3, enemy);
-    this.createButton(selectedFigure, index, i + 1, i - 2, enemy);
-    this.createButton(selectedFigure, index, i + 1, i, enemy);
-    this.createButton(selectedFigure, index, i - 3, i, enemy);
-    this.createButton(selectedFigure, index, i - 3, i - 2, enemy);
+  knightSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean, check: boolean, figureToInclude: Figure) {
+    this.createButton(selectedFigure, index, i, i + 1, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, i + 1, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, i, i - 3, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, i - 3, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, i + 1, i - 2, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, i + 1, i, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, i - 3, i, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, i - 3, i - 2, enemy, undefined, undefined, undefined, check, figureToInclude);
   }
 
-  bishopSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, index, i, i, enemy, undefined, undefined, 5);
-    this.createButton(selectedFigure, index, -i, i, enemy, undefined, undefined, 6);
-    this.createButton(selectedFigure, index, i, -i, enemy, undefined, undefined, 7);
-    this.createButton(selectedFigure, index, -i, -i, enemy, undefined, undefined, 8);
+  bishopSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean, check: boolean, figureToInclude: Figure) {
+    this.createButton(selectedFigure, index, i, i, enemy, undefined, undefined, 5, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, i, enemy, undefined, undefined, 6, check, figureToInclude);
+    this.createButton(selectedFigure, index, i, -i, enemy, undefined, undefined, 7, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, -i, enemy, undefined, undefined, 8, check, figureToInclude);
   }
 
-  queenSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
-    this.rookSteps(selectedFigure, index, i, enemy);
-    this.bishopSteps(selectedFigure, index, i, enemy);
+  queenSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean, check: boolean, figureToInclude: Figure) {
+    this.rookSteps(selectedFigure, index, i, enemy, check, figureToInclude);
+    this.bishopSteps(selectedFigure, index, i, enemy, check, figureToInclude);
   }
 
-  kingSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
-    this.createButton(selectedFigure, index, i, 0, enemy);
-    this.createButton(selectedFigure, index, -i, 0, enemy);
-    this.createButton(selectedFigure, index, 0, i, enemy);
-    this.createButton(selectedFigure, index, 0, -i, enemy);
-    this.createButton(selectedFigure, index, i, i, enemy);
-    this.createButton(selectedFigure, index, i, -i, enemy);
-    this.createButton(selectedFigure, index, -i, i, enemy);
-    this.createButton(selectedFigure, index, -i, -i, enemy);
+  kingSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean, check: boolean, figureToInclude: Figure) {
+    this.createButton(selectedFigure, index, i, 0, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, 0, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, 0, i, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, 0, -i, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, i, i, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, i, -i, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, i, enemy, undefined, undefined, undefined, check, figureToInclude);
+    this.createButton(selectedFigure, index, -i, -i, enemy, undefined, undefined, undefined, check, figureToInclude);
   }
 
-  pawnSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean) {
+  pawnSteps(selectedFigure: Figure, index: number, i: number, enemy: boolean, check: boolean) {
     let pawnBeat: number = enemy ? -1 : 1;
-    this.createButton(selectedFigure, index, pawnBeat, i, enemy, undefined, true);
+    this.createButton(selectedFigure, index, pawnBeat, i, enemy, undefined, true, undefined, check);
 
-    this.createButton(selectedFigure, index, 0, i, enemy, undefined, undefined, 0);
+    this.createButton(selectedFigure, index, 0, i, enemy, undefined, undefined, 0, check);
 
     if (!selectedFigure.firstMove) {
-      this.createButton(selectedFigure, index, 0, i + 1, enemy, true);
+      this.createButton(selectedFigure, index, 0, i + 1, enemy, true, undefined, undefined, check);
     }
   }
 
-  fakeSteps() { //"фейковые" шаги для всех фигур, чтобы определить, стоит ли у них на пути вражеский король
-    //"фейковые" шаги для ладьи, слона и ферзя (по 8 в каждую сторону)
-    for (let i: number = 0; i < this.mainFigures.length; i++) {
-      if (this.mainFigures[i].x !== -1 && this.mainFigures[i].y !== -1) {
+  doFakeSteps(enemy: boolean, figureToInclude: Figure) { //"фейковые" шаги для всех фигур, чтобы определить, стоит ли у них на пути вражеский король
+    let mainFigures: Figure[] = enemy ? this.mainFiguresEnemy : this.mainFigures;
+    let secondaryFigures: Figure[] = enemy ? this.secondaryFiguresEnemy : this.secondaryFigures;
+
+    for (let i: number = 0; i < mainFigures.length; i++) { //"фейковые" шаги для главных фигур
+      if (mainFigures[i].x !== -1 && mainFigures[i].y !== -1) {
         switch (i) {
           case 0:
           case 7:
-            this.rookSteps(this.mainFigures[i], i, i + 1, undefined);
+            for (let j: number = 1; j < 8; j++) {
+              this.rookSteps(mainFigures[i], i, j, enemy, true, figureToInclude);
+            }
+            break;
+          case 1:
+          case 6:
+            this.knightSteps(mainFigures[i], i, 1, enemy, true, figureToInclude);
             break;
           case 2:
           case 5:
-            this.bishopSteps(this.mainFigures[i], i, i + 1, undefined);
+            for (let j: number = 1; j < 8; j++) {
+              this.bishopSteps(mainFigures[i], i, j, enemy, true, figureToInclude);
+            }
             break;
           case 3:
-            this.queenSteps(this.mainFigures[i], i, i + 1, undefined);
-            break;
-        }
-      }
-    }
-
-    //"фейковые" шаги для коня и короля
-    for (let i: number = 0; i < this.mainFigures.length; i++) {
-      if (this.mainFigures[i].x !== -1 && this.mainFigures[i].y !== -1) {
-        switch (i) {
-          case 1:
-          case 6:
-            this.knightSteps(this.mainFigures[i], i, i + 1, undefined);
+            for (let j: number = 1; j < 8; j++) {
+              this.queenSteps(mainFigures[i], i, j, enemy, true, figureToInclude);
+            }
             break;
           case 4:
-            this.kingSteps(this.mainFigures[i], i, i + 1, undefined);
+            this.kingSteps(mainFigures[i], i, 1, enemy, true, figureToInclude);
             break;
         }
       }
     }
 
-    for (let i: number = 0; i < this.secondaryFigures.length; i++) {
-      if (this.secondaryFigures[i].x !== -1 && this.secondaryFigures[i].y !== -1) {
-        this.pawnSteps(this.secondaryFigures[i], i, i + 1, undefined);
+    for (let i: number = 0; i < secondaryFigures.length; i++) { //"фейковые" шаги для пешек
+      //(с ними потом разберёмся)
+      if (secondaryFigures[i].x !== -1 && secondaryFigures[i].y !== -1) {
+        //this.pawnSteps(secondaryFigures[i], i, 1, enemy, true);
       }
     }
   }

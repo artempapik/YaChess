@@ -150,11 +150,6 @@ export class HomeComponent {
 
     allFigures.length = 0;
 
-    if (figureToInclude === undefined) {
-      console.log(`hahahah`);
-
-    }
-
     if (check && figureToInclude !== undefined) { //если делаются "фейковые" ходы, включить в проверку ту 1 фигуру, относительно которой до этого рисовались клетки
       if (figureToInclude.x === newx && figureToInclude.y === newy) {
         return;
@@ -227,10 +222,7 @@ export class HomeComponent {
 
       if (buttonCoordx === kingEnemy.coordx && buttonCoordy === kingEnemy.coordy) {
         this.check = true;
-        console.log(kingEnemy);
-        //return;
       }
-
       return;
     }
 
@@ -256,48 +248,41 @@ export class HomeComponent {
 
     //
 
-    if (check) return;
-
     button.addEventListener("click", function () {
-      if (this.check) {
-        //проиграть развитие событий с данным ходом чёрных
-        //если он ведёт к избавлению от шаха - походить
-        this.check = false;
+      //if (this.check) {
+      //  //проиграть развитие событий с данным ходом чёрных; если он ведёт к избавлению от шаха - походить
+      //  this.check = false;
 
-        //console.log(`hah`);
+      //  let tmpx: number = selectedFigure.x;
+      //  let tmpy: number = selectedFigure.y;
+      //  let tmpcoordx: number = selectedFigure.coordx;
+      //  let tmpcoordy: number = selectedFigure.coordy;
+      //  let tmpfirstMove: boolean = selectedFigure.firstMove;
 
-        let tmpx: number = selectedFigure.x;
-        let tmpy: number = selectedFigure.y;
-        let tmpcoordx: number = selectedFigure.coordx;
-        let tmpcoordy: number = selectedFigure.coordy;
-        let tmpfirstMove: boolean = selectedFigure.firstMove;
+      //  selectedFigure.coordx += x * this.STEP;
 
-        console.log(`${x} ${y}`);
+      //  if (enemy) {
+      //    selectedFigure.coordy += y * this.STEP;
+      //  } else {
+      //    selectedFigure.coordy -= y * this.STEP;
+      //  }
 
-        selectedFigure.coordx += x * this.STEP;
+      //  selectedFigure.x = newx;
+      //  selectedFigure.y = newy;
+      //  selectedFigure.firstMove = true;
 
-        if (enemy) {
-          selectedFigure.coordy += y * this.STEP;
-        } else {
-          selectedFigure.coordy -= y * this.STEP;
-        }
+      //  this.doFakeSteps(!enemy, undefined);
 
-        selectedFigure.x = newx;
-        selectedFigure.y = newy;
-        selectedFigure.firstMove = true;
-
-        this.doFakeSteps(!enemy, undefined);
-
-        if (this.check) {
-          selectedFigure.x = tmpx;
-          selectedFigure.y = tmpy;
-          selectedFigure.coordx = tmpcoordx;
-          selectedFigure.coordy = tmpcoordy;
-          selectedFigure.firstMove = tmpfirstMove;
-          console.log(`cant move there`);
-          return;
-        }
-      }
+      //  if (this.check) {
+      //    selectedFigure.x = tmpx;
+      //    selectedFigure.y = tmpy;
+      //    selectedFigure.coordx = tmpcoordx;
+      //    selectedFigure.coordy = tmpcoordy;
+      //    selectedFigure.firstMove = tmpfirstMove;
+      //    console.log(`cant move there`);
+      //    return;
+      //  }
+      //}
 
       for (let figure of figuresEnemy) {
         if (button.style.left === `${figure.coordx}px` && button.style.top === `${figure.coordy}px`) {
@@ -472,11 +457,6 @@ export class HomeComponent {
   doFakeSteps(enemy: boolean, figureToInclude: Figure) { //"фейковые" шаги для всех фигур, чтобы определить, стоит ли у них на пути вражеский король
     let mainFigures: Figure[] = enemy ? this.mainFiguresEnemy : this.mainFigures;
     let secondaryFigures: Figure[] = enemy ? this.secondaryFiguresEnemy : this.secondaryFigures;
-
-    if (figureToInclude !== undefined) {
-      console.log(mainFigures);
-      console.log(secondaryFigures);
-    }
 
     for (let i: number = 0; i < mainFigures.length; i++) { //"фейковые" шаги для главных фигур
       if (mainFigures[i].x !== -1 && mainFigures[i].y !== -1) {

@@ -12,6 +12,6 @@ export class AppComponent {
   ) { }
 
   ngOnInit() {
-    this.router.navigate(['test']);
+    this.router.navigate(['home']);
   }
 }
